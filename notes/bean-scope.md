@@ -278,6 +278,59 @@ For `TestController1`, next it will try to resolve `Student` dependency. No matt
 
 Now when we invoke the `fetchUser` API for the second time, a new object will be created for `TestController1` for this Http request. It will go through the same process similar as the first http request.
 
+## Issue with Request Bean
+Consider below, What will happen?
+
+```java
+@RestController
+@Scope("singleton")
+@RequestMapping(value="/api/")
+public class TestController1 {
+
+    @Autowired
+    User user;
+
+    public TestController1(){
+        System.out.println("TestController1 instance initialization");
+    }
+
+    @PostContruct
+    public void init(){
+        System.out.println("TestController1 object hashCode: " + this.hashCode() + " User object hashCode: " + user.hashCode());
+    }
+
+    @GetMapping(path="/fetchUser")
+    public ResponseEntity<String> getUserDetails(){
+        System.out.println("fetchUser api invoked");
+        return ResponseEntity.status(HttpStatus.OK).body("");
+    }
+}
+```
+```java
+@Component
+@Scope("request")
+public class User {
+
+    public User(){
+        System.out.println("User instance initialization");
+    }
+
+    @PostConstruct
+    public void init(){
+        System.out.println("User object hashCode: " + this.hashCode());
+    }
+}
+```
+```
+Error creating bean with name 'testcontroller1': Unsatisfied dependency
+```
+
+## Explanation
+We have a class `TestController1` marked as `Singleton` and class `User` marked as `Request`. `TestController1` is dependent on `User`
+
+When you start the application, IOC gets started. IOC will look the classes which needs to be managed by spring i.e `@Component`,`@RestController`. Lets say it found `TestController1` and it is eagarly initialized as it has `Singleton` scope. It will call its constructor, but this object is not fully constructed yet. We need to inject dependencies into the constructed bean. 
+It goes to `User` and search for any active HTTP requests during the application startup. But there is no HTTP request present, so spring will not create its object and that's why it will get failed.
+
 ## ProxyMode Purpose and Usage
 ProxyMode is used to create a proxy for a bean, which can be useful in certain scenarios, such as when using scoped beans in singleton beans.
 
