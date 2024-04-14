@@ -75,8 +75,10 @@ public class User {
 ```
 
 ```
+At the start of Application
+
 TestController1 instance initialization
-User initialization
+User instance initialization
 User object hashCode: 1140202235
 TestController1 object hashCode: 1046302571 User object hashCode: 1140202235
 TestController2 instance initialization
@@ -156,15 +158,17 @@ public class User {
 }
 ```
 ```
+At the start of Application
+
 Student instance initialization
-User initialization
+User instance initialization
 User object hashCode: 1510009630
 Student object hashCode: 2092450685 User object hashCode: 1510009630
 
 Invoke localhost:8090/api/fetchUser
 
 TestController1 instance initialization
-User initialization
+User instance initialization
 User object hashCode: 1984730322
 TestController1 object hashCode: 1786739287 User object hashCode: 1984730322 Student object hashCode: 2092450685
 ```
@@ -175,27 +179,104 @@ When you start the application, IOC gets started. IOC will look the classes whic
 Now when we invoke the `fetchUser` API, `TestController1` object would be created by IOC. `TestController1` is a Prototype which means IOC has to create a new object of `TestController1`. Now it will call its constructor, next it will look for dependency resolutions. Since `User` is marked as `Prototype`, it creates a new object. And since `Student` is marked as `Singleton`, it was eagerly initialized, it would get injected. Now there are no more dependencies left, so it will go to `@PostConstruct` life cycle of `TestController1`.
 
 ## Request Bean Scope
-The request scope is used in web applications. A bean with the request scope will be created and available for the duration of a single HTTP request.
+- The request scope is used in web applications. 
+- A bean with the request scope will be created and available for the duration of a single HTTP request.
+- Lazily initialized
 
 ### Example
 ```java
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.context.annotation.RequestScope;
+@RestController
+@Scope("request")
+@RequestMapping(value="/api/")
+public class TestController1 {
 
-@Configuration
-public class AppConfig {
+    @Autowired
+    User user;
 
-    @Bean
-    @RequestScope
-    public MyBean myRequestBean() {
-        return new MyBean();
+    @Autowired
+    Student student;
+
+    public TestController1(){
+        System.out.println("TestController1 instance initialization");
+    }
+
+    @PostContruct
+    public void init(){
+        System.out.println("TestController1 object hashCode: " + this.hashCode() + " User object hashCode: " + user.hashCode() + " Student object hashCode: " + student.hashCode());
+    }
+
+    @GetMapping(path="/fetchUser")
+    public ResponseEntity<String> getUserDetails(){
+        System.out.println("fetchUser api invoked");
+        return ResponseEntity.status(HttpStatus.OK).body("");
     }
 }
 ```
+```java
+@Component
+@Scope("prototype")
+public class Student {
+
+    @Autowired
+    User user;
+
+    public Student(){
+        System.out.println("Student instance initialization");
+    }
+
+    @PostConstruct
+    public void init(){
+        System.out.println("Student object hashCode: " + this.hashCode() + " User object hashCode: " + user.hashCode());
+    }
+}
+```
+```java
+@Component
+@Scope("request")
+public class User {
+
+    public User(){
+        System.out.println("User instance initialization");
+    }
+
+    @PostConstruct
+    public void init(){
+        System.out.println("User object hashCode: " + this.hashCode());
+    }
+}
+```
+```
+No object is created at the start of Application
+
+Invoke localhost:8090/api/fetchUser
+
+TestController1 instance initialization
+User instance initialization
+User object hashCode: 39793904
+Student instance initialization
+Student object hashCode: 275139209 User object hashCode: 39793904
+TestController1 object hashCode: 898967761 User object hashCode: 39793904 Student object hashCode: 275139209
+fetchUser api invoked
+
+Invoke localhost:8090/api/fetchUser
+
+TestController1 instance initialization
+User instance initialization
+User object hashCode: 1227388929
+Student instance initialization
+Student object hashCode: 1206886228 User object hashCode: 1227388929
+TestController1 object hashCode: 1137709937 User object hashCode: 1227388929 Student object hashCode: 1206886228
+fetchUser api invoked
+```
 
 ### Explanation
-Here, `myRequestBean` is defined with the request scope. A new instance of the bean will be created for each HTTP request.
+When you start the application, IOC gets started. IOC will look the classes which needs to be managed by spring i.e `@Component`,`@RestController`. Lets say it start scanning from `TestController1`, since it is `Request` scope, it will be lazily initialized. It won't create an object until its not used. Next lets say it found `Student`, since it is `Prototype` scope, it will be lazily initialized. Now it found `User` which has `Request` scope, it will also be lazily initialized. So no object is created at the application startup.
+
+Now when we invoke the `fetchUser` API, IOC has to create an  object for `TestController1`. For this Http request, `TestController1` initialization happens and next it will look to resolve dependencies. So it goes to `User` which has `Request` scope, so only one instance or new instance should be created for each request. Since the current request does not have any `User` object, it will create a new `User` object. There are no dependencies for `User` object, so it will go to `@PostConstruct` life cycle of `User`. `User` will get injected into `TestController1`.
+
+For `TestController1`, next it will try to resolve `Student` dependency. No matter whether this is same request or different request, it will create a new `Student` object. It will initialize `Student` object and it will try to resolve `User` dependency in `Student`. We already have a `User` object created for the current request, so student will use the existing object and no new object will be created.
+
+Now when we invoke the `fetchUser` API for the second time, a new object will be created for `TestController1` for this Http request. It will go through the same process similar as the first http request.
 
 ## ProxyMode Purpose and Usage
 ProxyMode is used to create a proxy for a bean, which can be useful in certain scenarios, such as when using scoped beans in singleton beans.
