@@ -222,9 +222,10 @@ public class Order {
 
 - When we have multiple constructors, then Spring will not be able to decide which constructor to use.
 
+### Constructor Injection Exception Diagram
 ![Constructor Injection Exception Diagram](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ConstructorInjectionException.png)
 
-
+### Constructor Injection Example Diagram
 ![Constructor Injection Example Diagram](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ConstructorInjectionExample.png)
 
 ```
@@ -299,133 +300,109 @@ class UserTest {
 *   **More boilerplate code**: Requires constructors with parameters.
 *   **Complex constructors**: Can lead to constructors with many parameters.
 
-
-
-=============================================================================================
-
-```markdown
-# Dependency Injection in Spring Boot
-
-## Problem Exist Today for Which Dependency Injection is Required
-In traditional programming, objects are responsible for creating their dependencies. This tight coupling makes the code hard to test, maintain, and extend. Changes in one part of the application can have a ripple effect, requiring changes in multiple places. Dependency Injection (DI) addresses these issues by decoupling the creation of dependencies from their usage.
-
-## What is Dependency Injection and Its Types
-Dependency Injection is a design pattern that allows an object to receive its dependencies from an external source rather than creating them itself. This promotes loose coupling and enhances testability and maintainability.
-
-### Types of Dependency Injection
-1. **Field Injection**: Dependencies are injected directly into fields.
-2. **Setter Injection**: Dependencies are injected through setter methods.
-3. **Constructor Injection**: Dependencies are injected through the constructor.
-
-## Field Injection and Its Advantages and Disadvantages
-### Advantages
-- Simplicity: Easy to implement and understand.
-- Less boilerplate code: No need for constructors or setters.
-
-### Disadvantages
-- Limited testability: Difficult to mock dependencies in unit tests.
-- Hidden dependencies: Dependencies are not visible in the class's public API.
-- Circular dependencies: More prone to circular dependency issues.
-
-### Example
-```java
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-@Component
-public class MyService {
-    @Autowired
-    private MyRepository myRepository;
-
-    // Class implementation
-}
-```
-
-## Setter Injection and Its Advantages and Disadvantages
-### Advantages
-- Flexibility: Allows changing dependencies at runtime.
-- Better testability: Easier to mock dependencies in unit tests.
-
-### Disadvantages
-- Optional dependencies: Can lead to incomplete object initialization.
-- More boilerplate code: Requires setter methods.
-
-### Example
-```java
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-@Component
-public class MyService {
-    private MyRepository myRepository;
-
-    @Autowired
-    public void setMyRepository(MyRepository myRepository) {
-        this.myRepository = myRepository;
-    }
-
-    // Class implementation
-}
-```
-
-## Constructor Injection and Its Advantages and Disadvantages
-### Advantages
-- Immutability: Dependencies are set at object creation and cannot be changed.
-- Mandatory dependencies: Ensures all required dependencies are provided.
-- Better testability: Easier to mock dependencies in unit tests.
-
-### Disadvantages
-- More boilerplate code: Requires constructors with parameters.
-- Complex constructors: Can lead to constructors with many parameters.
-
-### Example
-```java
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-@Component
-public class MyService {
-    private final MyRepository myRepository;
-
-    @Autowired
-    public MyService(MyRepository myRepository) {
-        this.myRepository = myRepository;
-    }
-
-    // Class implementation
-}
-```
-
 ## Circular Dependency Problem and Its Solutions
 ### Problem
 Circular dependencies occur when two or more beans depend on each other, creating a cycle that Spring cannot resolve.
 
+![Circular Dependency Diagram](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/CircularDependency.png)
+
 ### Solutions
-1. **Refactor Code**: Break the circular dependency by introducing an intermediary bean or redesigning the dependencies.
-2. **Use `@Lazy` Annotation**: Mark one of the dependencies as lazy-initialized to break the cycle.
+1. **Refactor Code**: Break the circular dependency by introducing an intermediary bean or redesigning the dependencies. For example, common code in which both are dependent, can be taken out to seperate class. This way we can break the circular dependency.
+2. **Use `@Lazy` Annotation**: Mark one of the dependencies as lazy-initialized to break the cycle. Spring will create proxy bean instead of creating the bean instance immediately during application startup.
 
-### Example
+### Example -  `@Lazy` on Field Injection
 ```java
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
-
 @Component
-public class A {
-    private final B b;
+public class Order {
 
     @Autowired
-    public A(@Lazy B b) {
-        this.b = b;
+    Invoice invoice;
+
+    public Order() {
+        System.out.println("Order initialized");
     }
 }
 
 @Component
-public class B {
-    private final A a;
+public class Invoice {
+
+    @Lazy   // Put Proxy
+    @Autowired
+    Order order;
+
+    public Invoice() {
+        System.out.println("Invoice initialized");
+    }
+}
+
+// Invoice initialized
+// Order initialized
+```
+
+### Example -  `@Lazy` on Setter Injection
+```java
+@Component
+public class Order {
+
+    Invoice invoice;
+
+    public Order() {
+        System.out.println("Order initialized");
+    }
 
     @Autowired
-    public B(A a) {
-        this.a = a;
+    public void setInvoice(Invoice invoice){
+        this.invoice = invoice;
+    }
+}
+
+@Component
+public class Invoice {
+
+    Order order;
+
+    public Invoice() {
+        System.out.println("Invoice initialized");
+    }
+
+    @Lazy
+    @Autowired
+    public void setOrder(Order order){
+        this.order = order;
+    }
+}
+```
+### Example -  Using `@PostConstruct`
+```java
+// Not Recommended
+
+@Component
+public class Order {
+
+    @Autowired
+    Invoice invoice;    // During Dependency Injection, this will have order as null
+
+    public Order() {
+        System.out.println("Order initialized");
+    }
+
+    @PostConstruct      // After Bean is constructed, this will set the order to current instance.
+    public void initialize(){
+        invoice.setOrder(this);
+    }
+}
+
+@Component
+public class Invoice {
+
+    public Order order;     // By default, order is set to null as there is no @Autowired
+
+    public Invoice() {
+        System.out.println("Invoice initialized");
+    }
+
+    public void setOrder(Order order){
+        this.order = order;
     }
 }
 ```
@@ -435,25 +412,45 @@ public class B {
 Unsatisfied dependencies occur when Spring cannot find a bean to inject into a dependent bean.
 
 ### Solutions
-1. **Check Bean Definitions**: Ensure all required beans are defined and annotated correctly.
+1. **Use `@Primary` Annotation**: Specificy Spring to give 1st priority when multiple beans of the same type exist.
 2. **Use `@Qualifier` Annotation**: Specify which bean to inject when multiple beans of the same type exist.
 
-### Example
+### Example for Unsatisfied Dependency
+![Unsatisfied Dependency Diagram](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/UnsatisfiedDependency.png)
+
+### Example for `@Primary` Annotation
 ```java
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
-
+// Using @Primary Annotation
+@Primary
 @Component
-public class MyService {
-    private final MyRepository myRepository;
-
-    @Autowired
-    public MyService(@Qualifier("specificRepository") MyRepository myRepository) {
-        this.myRepository = myRepository;
+public class OnlineOrder implements Order {
+    public OnlineOrder() {
+        System.out.println("Online Order initialized");
     }
 }
 ```
 
-This guide provides an overview of Dependency Injection in Spring Boot, its types, and common problems with their solutions. The sample code snippets should help you understand these concepts in practice.
+### Example for `@Qualifier` Annotation
+```java
+// Using @Qualifier Annotation
+
+@Component
+public class User {
+    @Qualifier("onlineOrderName")
+    @Autowired
+    Order order;
+
+    public User() {
+        System.out.println("User initialized");
+    }
+}
+
+@Component
+@Qualifier("onlineOrderName")
+public class OnlineOrder implements Order {
+    public OnlineOrder() {
+        System.out.println("Online Order initialized");
+    }
+}
+
 ```
