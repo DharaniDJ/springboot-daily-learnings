@@ -331,29 +331,73 @@ We have a class `TestController1` marked as `Singleton` and class `User` marked 
 When you start the application, IOC gets started. IOC will look the classes which needs to be managed by spring i.e `@Component`,`@RestController`. Lets say it found `TestController1` and it is eagarly initialized as it has `Singleton` scope. It will call its constructor, but this object is not fully constructed yet. We need to inject dependencies into the constructed bean. 
 It goes to `User` and search for any active HTTP requests during the application startup. But there is no HTTP request present, so spring will not create its object and that's why it will get failed.
 
+So if we have any class with `Singleton` and it has a dependency on a class which has Scope `Request`, we can use something called `ProxyMode`.
+
 ## ProxyMode Purpose and Usage
 ProxyMode is used to create a proxy for a bean, which can be useful in certain scenarios, such as when using scoped beans in singleton beans.
 
 ### Example
 ```java
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
+@RestController
+@Scope("singleton")
+@RequestMapping(value="/api/")
+public class TestController1 {
 
-@Configuration
-public class AppConfig {
+    @Autowired
+    User user;
 
-    @Bean
-    @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-    public MyBean mySessionBean() {
-        return new MyBean();
+    public TestController1(){
+        System.out.println("TestController1 instance initialization");
+    }
+
+    @PostContruct
+    public void init(){
+        System.out.println("TestController1 object hashCode: " + this.hashCode() + " User object hashCode: " + user.hashCode());
+    }
+
+    @GetMapping(path="/fetchUser")
+    public ResponseEntity<String> getUserDetails(){
+        System.out.println("fetchUser api invoked");
+        return ResponseEntity.status(HttpStatus.OK).body("");
     }
 }
 ```
+```java
+@Component
+@Scope("request", ProxyMode = ScopedProxyMode.TARGET_CLASS)     // Telling IOC to create a proxy object at the time of eagerly initialization
+public class User {
+
+    public User(){
+        System.out.println("User instance initialization");
+    }
+
+    @PostConstruct
+    public void init(){
+        System.out.println("User object hashCode: " + this.hashCode());
+    }
+
+    public void dummyMethod(){
+
+    }
+}
+```
+```
+TestController1 instance initialization
+TestController1 object hashCode: 1356419559 User object hashCode: 1159352444
+
+Invoke localhost:8090/api/fetchUser
+
+fetchUser api invoked
+User instance initialization
+User object hashCode: 1078757370
+```
 
 ### Explanation
-In this example, `mySessionBean` is defined with a session scope and a proxy mode. The proxy mode ensures that the correct instance of the bean is injected at runtime.
+In this example, `User` is defined with a request scope and a proxy mode. The proxy mode tells IOC to create a proxy object at the time of eagerly initialization but when ultimately we are going to invoke, then we can create a real object and tied up with the HTTP request.
+
+When you start the application, IOC gets started. IOC will look the classes which needs to be managed by spring i.e `@Component`,`@RestController`. Lets say it found `TestController1` and it is eagarly initialized as it has `Singleton` scope. It will call its constructor, but this object is not fully constructed yet. We need to inject dependencies into the constructed bean. Since `User` is `Request` scope, it should be with HTTP request. But we have put a `ProxyMode`, so if no HTTP request is present, create a dummy user object and inject. In the console you won't see `User instance initialization` message, but some how dummy object is inserted and `TestController1` goes to `PostConstruct` life cycle. 
+
+Now when we invoke the `fetchUser` API, the actual dependency for `TestController1` gets resolved.
 
 ## Session Bean Scope
 The session scope is also used in web applications. A bean with the session scope will be created and available for the duration of an HTTP session.
