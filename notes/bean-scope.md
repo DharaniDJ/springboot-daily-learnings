@@ -400,37 +400,101 @@ When you start the application, IOC gets started. IOC will look the classes whic
 Now when we invoke the `fetchUser` API, the actual dependency for `TestController1` gets resolved.
 
 ## Session Bean Scope
-The session scope is also used in web applications. A bean with the session scope will be created and available for the duration of an HTTP session.
+- The session scope is also used in web applications.
+- A bean with the session scope will be created and available for the duration of an __HTTP session__.
+- Lazily initialized.
+- When user accesses any endpoint, session is created.
+- Remains active, till it does not expires.
 
 ### Example
 ```java
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.context.annotation.SessionScope;
+@RestController
+@Scope("session")
+@RequestMapping(value="/api/")
+public class TestController1 {
 
-@Configuration
-public class AppConfig {
+    @Autowired
+    User user;
 
-    @Bean
-    @SessionScope
-    public MyBean mySessionBean() {
-        return new MyBean();
+    public TestController1(){
+        System.out.println("TestController1 instance initialization");
+    }
+
+    @PostContruct
+    public void init(){
+        System.out.println("TestController1 object hashCode: " + this.hashCode() + " User object hashCode: " + user.hashCode());
+    }
+
+    @GetMapping(path="/fetchUser")
+    public ResponseEntity<String> getUserDetails(){
+        System.out.println("fetchUser api invoked");
+        return ResponseEntity.status(HttpStatus.OK).body("");
+    }
+
+    @GetMapping(path="/logout")
+    public ResponseEntity<String> getUserDetails(HttpServletRequest request){
+        System.out.println("end the session");
+        HttpSession session = request.getSession();
+        session.invalidate();
+        return ResponseEntity.status(HttpStatus.OK).body("");
     }
 }
 ```
+```java
+@Component
+public class User {
+
+    public User(){
+        System.out.println("User instance initialization");
+    }
+
+    @PostConstruct
+    public void init(){
+        System.out.println("User object hashCode: " + this.hashCode());
+    }
+
+    public void dummyMethod(){
+
+    }
+}
+```
+```
+User instance initialization
+User object hashCode: 254812619
+
+Invoke localhost:8090/api/fetchUser
+
+TestController1 instance initialization
+TestController1 object hashCode: 1476370807 User object hashCode: 254812619
+fetchuser api invoked
+
+Invoke localhost:8090/api/fetchUser
+fetchuser api invoked
+
+Invoke localhost:8090/api/logout
+end the session
+
+Invoke localhost:8090/api/fetchUser
+TestController1 instance initialization
+TestController1 object hashCode: 754846954 User object hashCode: 254812619
+fetchuser api invoked
+```
 
 ### Explanation
-Here, `mySessionBean` is defined with the session scope. A new instance of the bean will be created for each HTTP session.
+When you start the application, IOC gets started. IOC will look the classes which needs to be managed by spring i.e `@Component`,`@RestController`. Lets say it start scanning from `TestController1`, since it is `session` scope, it will be lazily initialized. It won't create an object until its not used. Next lets say it found `User`, since it is `Singleton` scope, it will be eagarly initialized.  It will call its constructor and there are no dependencies so `User` hashCode will also get printed.
+
+Now when we invoke the `fetchUser` API for the first time, HTTP session would get created. `TestController1` instance would be initialized. Now it will try to resolve dependencies i.e `User` since it is `Singleton` scope, it uses the same object that is created before. Now it goes to `PostConstruct` lifecycle.
+
+When we call the `fetchUser` again, since the session is valid, it wont create any object. Now when we call `logout` API which ends the current session.
+
+Now when we call the `fetchUser` again, it will create a new session again. Which means `TestController1` instance would be initialized. Now it will try to resolve dependencies i.e `User` since it is `Singleton` scope, it uses the same object that is created before. Now it goes to `PostConstruct` lifecycle.
 
 ## Application Bean Scope
-The application scope is used in web applications. A bean with the application scope will be created and available for the duration of a ServletContext.
-
+- The application scope is used in web applications. A bean with the application scope will be created and available for the duration of a ServletContext.
+- Singleton scope means 1 object per IOC.
+- Application scope means 1 object for all IOC's
 ### Example
 ```java
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.context.annotation.ApplicationScope;
-
 @Configuration
 public class AppConfig {
 
@@ -450,13 +514,6 @@ The WebSocket scope is used in web applications that use WebSockets. A bean with
 
 ### Example
 ```java
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import org.springframework.web.context.annotation.WebSocketScope;
-
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
