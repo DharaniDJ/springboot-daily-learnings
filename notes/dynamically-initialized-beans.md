@@ -6,6 +6,57 @@ In Spring Boot, beans are the backbone of any application. They are objects that
 ## Problem Statement
 In some applications, the exact nature of the beans required cannot be determined at compile-time. For instance, you might need to create beans based on user input, configuration files, or external services. This poses a challenge as the traditional static bean definitions are insufficient for such dynamic requirements.
 
+```java
+@RestController
+@RequestMapping(value="/api")
+public class User {
+    
+    @Autowired
+    Order order;
+
+    @PostMapping("/createOrder")
+    public ResponseEntity<String> createOrder() {
+        order.createOrder()
+        return ResponseEntity.ok("");
+    }
+}
+```
+```java
+public interface Order {
+    
+    public void createOrder() {}
+}
+```
+```java
+public class OnlineOrder implements Order {
+
+    public OnlineOrder(){
+        System.out.println("Online Order Initialized")
+    }
+    
+    public void createOrder() {
+        System.out.println("Created Online Order");
+    }
+}
+```
+```java
+public class OfflineOrder implements Order {
+
+    public OfflineOrder(){
+        System.out.println("Offline Order Initialized")
+    }
+    
+    public void createOrder() {
+        System.out.println("Created Offline Order");
+    }
+}
+```
+In the above code, we have an interface `Order` and it has two children `OnlineOrder` and `OfflineOrder`. We have a `User` class which is a controller, it has a dependency on this `Order` object. 
+
+When you start the application, IOC gets started. IOC will look the classes which needs to be managed by spring i.e `@Component`,`@RestController`. Lets say it found `User` and it is eagarly initialized as it has `Singleton` scope. It will call its constructor, but this object is not fully constructed yet. We need to inject dependencies into the constructed bean. Now Spring doesn't know which object to assign to this `Order`, whether `OnlineOrder` or `OfflineOrder`. 
+
+So the application failed to start - __UnsatisfiedDependencyException: Error creating bean with name `User`__
+
 ## Solution
 Spring Boot provides several mechanisms to dynamically initialize beans. These include:
 - Using `@Bean` methods in configuration classes.
