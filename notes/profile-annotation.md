@@ -17,9 +17,28 @@ Yes, using both we can achieve this requirement. But `@Profile` is technically i
 In Spring Boot, the `@Profile` annotation is used to conditionally enable or disable beans based on the active profiles. Profiles are a way to segregate parts of your application configuration and make it only available in certain environments. This is particularly useful for managing different configurations for development, testing, and production environments.
 
 ## Profiling in Spring Boot ("spring.profiles.active")
-Spring Boot allows you to specify which profiles are active using the `spring.profiles.active` property. This can be set in various ways, including:
 
-- **application.properties or application.yml**: You can define the active profiles directly in your configuration files.
+Consider a situation that you have a DB and you are running certain code in your Dev/Local machine, it would have a different username and password to connect to dev database compared to, let's say, QA/Stage machine. It would also be different in your Prod/Live machine. So, we have different types of environments when we work with the same code.
+
+![Spring Profile Example](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/SpringProfileExample.png)
+
+
+This `Username` and `Password` is just one example. There are so many other configurations, which are different for different environments, like:
+- URL and Port number
+- Connection timeout values
+- Request Timeout values
+- Throttle values
+- Retry values etc.
+
+## How to handle for different environment configurations?
+we put the configurations in `application.properties` file, but how to handle for different environment configurations in a single file?
+
+That's where `Profiling` comes into picture. Spring Boot allows you to specify which profiles are active using the `spring.profiles.active` property. This can be set in various ways, including:
+
+- **application.properties or application.yml**: You can define the active profiles directly in your configuration files. we can have `application.properties` for each profile/environment.
+
+  ![Spring Profile Default Code Snippet](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/SpringProfileDefaultCodeSnippet.png)
+  
   ```properties
   spring.profiles.active=dev
   ```
@@ -28,6 +47,12 @@ Spring Boot allows you to specify which profiles are active using the `spring.pr
     profiles:
       active: dev
   ```
+
+  And during application startup, we can tell spring boot to pick specific "application properties" file, using `spring.profile.active` configuration.
+
+  ![Spring Profile Profile Code Snippet](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/SpringProfileProfileCodeSnippet.png)
+
+  We can pass the value to this configuration "spring.profiles.active" during application startup itself
 
 - **Command Line Arguments**: You can pass the active profiles as command-line arguments when starting your application.
   ```sh
