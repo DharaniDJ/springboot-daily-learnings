@@ -39,6 +39,20 @@ That's where `Profiling` comes into picture. Spring Boot allows you to specify w
 
   ![Spring Profile Default Code Snippet](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/SpringProfileDefaultCodeSnippet.png)
   
+  ```java
+  @Component
+  public class MySQLConnection {
+    @Value("${username}")
+    String username;
+
+    @Value("${username}")
+    String password;
+
+    @PostConstruct
+    public void init() {
+      System.out.println("Username: " + username + " password: " + password);
+  }
+  ```
   ```properties
   spring.profiles.active=dev
   ```
@@ -52,7 +66,7 @@ That's where `Profiling` comes into picture. Spring Boot allows you to specify w
 
   ![Spring Profile Profile Code Snippet](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/SpringProfileProfileCodeSnippet.png)
 
-  We can pass the value to this configuration "spring.profiles.active" during application startup itself
+  If there are any configurations that are missing in the `application-qa.properties`, it will takes those from the parent file i.e `application.properties`
 
 - **Command Line Arguments**: You can pass the active profiles as command-line arguments when starting your application.
   ```sh
@@ -63,7 +77,37 @@ That's where `Profiling` comes into picture. Spring Boot allows you to specify w
   ```sh
   export SPRING_PROFILES_ACTIVE=dev
   ```
+- **ADD in pom.xml**: 
+  ```xml
+  <profiles>
 
+    <profile>
+      <id>local</id>
+    <properties>
+      <property name="spring.profiles.active" value="dev"/>
+    </properties>
+    </profile>
+
+    <profile>
+      <id>production</id>
+    <properties>
+      <property name="spring.profiles.active" value="prod"/>
+    </properties>
+    </profile>
+
+    <profile>
+      <id>stage</id>
+    <properties>
+      <property name="spring.profiles.active" value="qa"/>
+    </properties>
+    </profile>
+
+  </profiles>
+  ```
+
+  ```sh
+  mvn spring-boot:run -Pproduction
+  ```
 ## Profile Annotation with Java Example
 The `@Profile` annotation can be used on `@Configuration` classes or individual `@Bean` methods to conditionally include them based on the active profiles.
 
