@@ -74,4 +74,4 @@ Apart from the above 3 layers, there are other packages which we create in Sprin
 
 By adhering to a layered architecture, Spring Boot applications can achieve a high degree of modularity, making them easier to develop, test, and maintain. Each layer can be independently developed and tested, reducing dependencies and increasing the application's robustness and flexibility.
 
-![Layered Architecture Diagram](../assets/layeredArchDiagram.png)
+![Layered Architecture Diagram](../assets/layeredArchDiagram.png?raw=true)
