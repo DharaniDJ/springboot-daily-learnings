@@ -65,6 +65,7 @@ Spring Boot provides several mechanisms to dynamically initialize beans. These i
 - Using `@Qualifier` to specify which bean should be injected.
 - Leveraging the `ApplicationContext` to register beans programmatically.
 - Utilizing factory beans for more complex initialization logic.
+- Dynamically Initialized Beans using `@Bean`
 
 ### Using `@Qualifer` Annotation
 - Using `@Qualifier` to specify which bean should be injected is particularly useful when dynamically initializing beans. This annotation allows you to differentiate between multiple beans of the same type.
@@ -205,38 +206,77 @@ public class MyBeanFactory implements FactoryBean<MyBean> {
 }
 ```
 
-## Qualifiers
-When dealing with multiple beans of the same type, you can use `@Qualifier` to specify which bean should be injected. This is particularly useful when dynamically initializing beans.
-
-```java
-@Service
-public class MyService {
-
-    private final MyBean myBean;
-
-    @Autowired
-    public MyService(@Qualifier("myDynamicBean") MyBean myBean) {
-        this.myBean = myBean;
-    }
-}
-```
-
-## Dynamically Initialized Beans
+### Dynamically Initialized Beans
 Dynamically initialized beans provide the flexibility needed for complex applications where the exact nature of the beans cannot be determined at compile-time. By leveraging Spring Boot's configuration capabilities, you can create and manage beans dynamically, ensuring your application remains robust and adaptable to changing requirements.
 
 ```java
-@Configuration
-public class AppConfig {
+@RestController
+@RequestMapping(value="/api")
+public class User {
+    
+    @Autowired
+    Order order;
 
-    @Bean
-    @Scope("prototype")
-    public MyBean myBean() {
-        return new MyBean();
+    @PostMapping("/createOrder")
+    public ResponseEntity<String> createOrder() {
+        order.createOrder()
+        return ResponseEntity.ok("");
     }
 }
 ```
+```java
+public interface Order {
+    
+    public void createOrder() {}
+}
+```
+```java
+// No @Component
+public class OnlineOrder implements Order {
 
-In this example, the `myBean` method is annotated with `@Scope("prototype")`, indicating that a new instance of `MyBean` should be created each time it is requested.
+    public OnlineOrder(){
+        System.out.println("Online Order Initialized")
+    }
+    
+    public void createOrder() {
+        System.out.println("Created Online Order");
+    }
+}
+```
+```java
+// No @Component
+public class OfflineOrder implements Order {
 
-## Conclusion
-Dynamically initializing beans in Spring Boot allows for greater flexibility and adaptability in your applications. By using `@Bean` methods, programmatic registration, and factory beans, you can create beans based on runtime conditions, ensuring your application can handle a wide range of scenarios.
+    public OfflineOrder(){
+        System.out.println("Offline Order Initialized")
+    }
+    
+    public void createOrder() {
+        System.out.println("Created Offline Order");
+    }
+}
+```
+```java
+@Configuration
+public class AppConfig{
+
+    @Bean
+    public Order createOrderBean(@Value("${isOnlineOrder}") boolean isOnlineOrder){
+        if(isOnlineOrder){
+            return new OnlineOrder();
+        }else{
+            return new OfflineOrder();
+        }
+    }
+}
+```
+```
+In application.properties, we will set isOnlineOrder to false and @Value takes the value of isOnlineOrder from application.properties file
+
+isOnlineOrder=false
+```
+
+When you start the application, IOC gets started. IOC will look the classes which needs to be managed by spring i.e `@Component`,`@RestController`. Lets say it found `User` and it is eagarly initialized as it has `Singleton` scope. It will call its constructor, but this object is not fully constructed yet. We need to inject dependencies into the constructed bean. The `OnlineOrder` and `OfflineOrder` class does not have `@Component`, so IOC will skip these files and go to `@Configuration` which is `AppConfig` to see if there is any configuration provided for `Order`. 
+
+`@Value` is used to inject values from various sources like property file, environment variables or inline literals.
+
