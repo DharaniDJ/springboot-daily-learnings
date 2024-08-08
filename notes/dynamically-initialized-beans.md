@@ -28,6 +28,7 @@ public interface Order {
 }
 ```
 ```java
+@Component
 public class OnlineOrder implements Order {
 
     public OnlineOrder(){
@@ -40,6 +41,7 @@ public class OnlineOrder implements Order {
 }
 ```
 ```java
+@Component
 public class OfflineOrder implements Order {
 
     public OfflineOrder(){
@@ -59,29 +61,92 @@ So the application failed to start - __UnsatisfiedDependencyException: Error cre
 
 ## Solution
 Spring Boot provides several mechanisms to dynamically initialize beans. These include:
-- Using `@Bean` methods in configuration classes.
+
+- Using `@Qualifier` to specify which bean should be injected.
 - Leveraging the `ApplicationContext` to register beans programmatically.
 - Utilizing factory beans for more complex initialization logic.
 
-### Using `@Bean` Methods
-You can define beans dynamically using `@Bean` methods in your configuration classes. This allows you to use conditional logic to determine which beans to create.
+### Using `@Qualifer` Annotation
+- Using `@Qualifier` to specify which bean should be injected is particularly useful when dynamically initializing beans. This annotation allows you to differentiate between multiple beans of the same type.
 
 ```java
-@Configuration
-public class DynamicBeanConfig {
+@RestController
+@RequestMapping(value="/api")
+public class User {
+    
+    @Qualifier("onlineOrderObject")
+    @Autowired
+    Order order;
 
-    @Bean
-    public MyBean myBean() {
-        if (someCondition()) {
-            return new MyBeanImpl1();
-        } else {
-            return new MyBeanImpl2();
-        }
+    @PostMapping("/createOrder")
+    public ResponseEntity<String> createOrder() {
+        order.createOrder()
+        return ResponseEntity.ok("");
     }
+}
+```
+```java
+public interface Order {
+    
+    public void createOrder() {}
+}
+```
+```java
+@Qualifier("onlineOrderObject")
+@Component
+public class OnlineOrder implements Order {
 
-    private boolean someCondition() {
-        // Your condition logic here
-        return true;
+    public OnlineOrder(){
+        System.out.println("Online Order Initialized")
+    }
+    
+    public void createOrder() {
+        System.out.println("Created Online Order");
+    }
+}
+```
+```java
+@Qualifier("offlineOrderObject")
+@Component
+public class OfflineOrder implements Order {
+
+    public OfflineOrder(){
+        System.out.println("Offline Order Initialized")
+    }
+    
+    public void createOrder() {
+        System.out.println("Created Offline Order");
+    }
+}
+```
+
+- Here we have hardcoded the `order` value in `User`. If `User` want to create `offlineOrder` we can't do it because when spring creates a `User` object, it will only assign the `onlineObject`. It breaks `Dependency Injection`, which says that dynamically you can provide any value. Dependency injection is basically providing the objects that an object needs (its dependencies) instead of having it construct them itself.
+
+Look at the below updated code for ensure Dependency Injection.
+
+```java
+@RestController
+@RequestMapping(value="/api")
+public class User {
+    
+    @Qualifier("onlineOrderObject")
+    @Autowired
+    Order onlineOrderObj;
+
+    @Qualifier("offlineOrderObject")
+    @Autowired
+    Order offlineOrderObj;
+
+    @PostMapping("/createOrder")
+    public ResponseEntity<String> createOrder(@RequestPara boolean isOnlineOrder) {
+        
+        if(isOnlineOrder){
+            onlineOrderObj.createOrder();
+        }else{
+            offlineOrderObj.createOrder();
+        }
+
+        return ResponseEntity.ok("");
     }
 }
 ```
