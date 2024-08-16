@@ -111,6 +111,10 @@ That's where `Profiling` comes into picture. Spring Boot allows you to specify w
 ## Profile Annotation with Java Example
 The `@Profile` annotation can be used on `@Configuration` classes or individual `@Bean` methods to conditionally include them based on the active profiles.
 
+![Profile Annotation Example](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ProfileAnnotationExample.png)
+![Profile Annotation Example 1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ProfileAnnotationExample1.png)
+
+ProfileAnnotationExample
 ### Example 1: Using @Profile on Configuration Class
 ```java
 @Configuration
@@ -141,6 +145,10 @@ Here, the `myService` bean will only be created if the `prod` profile is active.
 
 ### Example 3: Multiple Profiles
 You can also specify multiple profiles for a single configuration or bean.
+
+![Multiple Profiles Example](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/MultipleProfiles.png)
+
+
 ```java
 @Configuration
 @Profile({"dev", "test"})
@@ -153,6 +161,8 @@ public class DevTestConfig {
 }
 ```
 In this example, the `DevTestConfig` configuration class and its beans will be loaded if either the `dev` or `test` profile is active.
+
+![Profile Recap Question](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ProfileRecapQuestion.png)
 
 ## Conclusion
 The `@Profile` annotation in Spring Boot provides a powerful way to manage different configurations for different environments. By using profiles, you can easily switch between configurations without changing the code, making your application more flexible and easier to maintain. Whether you are working in development, testing, or production, profiles help ensure that your application behaves as expected in each environment.
