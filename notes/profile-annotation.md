@@ -162,7 +162,7 @@ public class DevTestConfig {
 ```
 In this example, the `DevTestConfig` configuration class and its beans will be loaded if either the `dev` or `test` profile is active.
 
-![Profile Recap Question](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ProfileRecapQuestion.png)
+![Profile Question Recap](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ProfileQuestionRecap.png)
 
 ## Conclusion
 The `@Profile` annotation in Spring Boot provides a powerful way to manage different configurations for different environments. By using profiles, you can easily switch between configurations without changing the code, making your application more flexible and easier to maintain. Whether you are working in development, testing, or production, profiles help ensure that your application behaves as expected in each environment.
