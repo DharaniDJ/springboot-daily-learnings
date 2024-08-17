@@ -60,7 +60,7 @@ Here are links to my notes taken during my learning journey with Spring Boot:
 - [Custom Interceptors](notes/custom-interceptors.md)
 - [filters-vs-interceptor](notes/filters-vs-interceptor.md)
 - [Spring boot HATEOAS](notes/hateoas.md)
-
+- [Spring boot ResponseEntity and Response Codes](notes/response-codes-types.md)
 ## Installation
 
 To install and run the Spring Boot application, follow these steps:
