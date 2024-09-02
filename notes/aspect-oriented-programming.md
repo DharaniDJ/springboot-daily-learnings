@@ -36,14 +36,18 @@ public class Employee {
 @Component
 @Aspect
 public class LoggingAspect {
-    @Before ("execution(Employee.fetchEmployee())")
+    @Before ("execution(public String com.conceptandcoding.learningspringboot,Employee.fetchEmployee())")
     public void beforeMethod() {
         System.out.println("inside beforeMethod Aspect");
     }
 }
 ```
-### TODO
-In the above example, after the application started properly
+### Explanation
+In the above example, after the application started properly, if we hit the api `/fetchEmployee`, before the execution of this `fetchEmployee` method, `beforeMethod()` will get invoke and `inside beforeMethod Aspect` gets printed and then returns `Employee Fetched`.  AOP helps you to intercept the method right before this method get invoked. It intercepted it and it performs certain task and then it calls the method.
+
+## Some important AOP concepts:
+![AOP Concepts Diagram](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/AOP_Concepts.png)
+
 
 ## Pointcuts and Its Different Types
 
