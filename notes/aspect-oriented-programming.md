@@ -51,16 +51,20 @@ In the above example, after the application started properly, if we hit the api 
 
 ## Pointcuts and Its Different Types
 
-Pointcuts are expressions that match join points. They define where an advice should be applied. Spring AOP provides several types of pointcut expressions:
+Pointcuts are expressions that match join points. They define where an `advice` should be applied. Spring AOP provides several types of pointcut expressions:
 
 ### Execution
-The `execution` pointcut is used to match method execution join points.
+The `execution` pointcut is used to match particular method in a particular class.
 
 ```java
 @Pointcut("execution(* com.example.service.*.*(..))")
 public void serviceLayer() {}
 ```
 This pointcut matches the execution of any method in the `com.example.service` package.
+
+![Execution_Pointcut_1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/Execution_Pointcut_1.png)
+
+![Execution_Pointcut_2](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/Execution_Pointcut_2.png)
 
 ### Within
 The `within` pointcut is used to match join points within certain types.
