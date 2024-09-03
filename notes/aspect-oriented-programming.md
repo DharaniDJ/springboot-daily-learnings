@@ -36,7 +36,7 @@ public class Employee {
 @Component
 @Aspect
 public class LoggingAspect {
-    @Before ("execution(public String com.conceptandcoding.learningspringboot,Employee.fetchEmployee())")
+    @Before ("execution(public String com.conceptandcoding.learningspringboot.Employee.fetchEmployee())")
     public void beforeMethod() {
         System.out.println("inside beforeMethod Aspect");
     }
@@ -67,13 +67,30 @@ This pointcut matches the execution of any method in the `com.example.service` p
 ![Execution_Pointcut_2](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/Execution_Pointcut_2.png)
 
 ### Within
-The `within` pointcut is used to match join points within certain types.
+The `within` pointcut is used to match all methods within any class or package.
 
+This pointcut will run for each method in the class Employee.
 ```java
-@Pointcut("within(com.example.service..*)")
-public void withinServiceLayer() {}
+@Before("within(com.conceptandcoding.learningspringboot.Employee)")
 ```
-This pointcut matches any join point within the `com.example.service` package and its sub-packages.
+
+This pointcut will run for each method in this package and subpackage.
+```java
+@Before("within(com.conceptandcoding.learningspringboot..*)")
+```
+
+### @within
+The `@within` pointcut is used to match any method in a class which has this annotation.
+
+This pointcut will run for each method in the class Employee.
+```java
+@Before("within(com.conceptandcoding.learningspringboot.Employee)")
+```
+
+This pointcut will run for each method in this package and subpackage.
+```java
+@Before("within(com.conceptandcoding.learningspringboot..*)")
+```
 
 ### Args
 The `args` pointcut is used to match join points based on the arguments passed to the method.
