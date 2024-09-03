@@ -84,13 +84,50 @@ The `@within` pointcut is used to match any method in a class which has this ann
 
 This pointcut will run for each method in the class Employee.
 ```java
-@Before("within(com.conceptandcoding.learningspringboot.Employee)")
+@Before("@within(com.conceptandcoding.learningspringboot.Employee)")
 ```
 
 This pointcut will run for each method in this package and subpackage.
 ```java
-@Before("within(com.conceptandcoding.learningspringboot..*)")
+@Before("@within(com.conceptandcoding.learningspringboot..*)")
 ```
+
+![@within-Pointcut](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/@within-Pointcut.png)
+
+### Explanation
+
+`@Before("@within(org.springframework.stereotype.Service)")` - Will look for classes that has `@Service` annotation
+
+### @annotation
+The `@annotation` pointcut is used to match any method that is annotated with given annotation.
+
+
+```java
+@RestController
+@RequestMapping(value="/api/")
+public class Employee {
+    @GetMapping(path="/fetchEmployee")
+    public String fetchEmployee(){
+        return "Employee fetched";
+    }
+}
+```
+
+```java
+@Component
+@Aspect
+public class LoggingAspect {
+
+    @Before("@annotation(org.springframework.web.bind.annotation.GetMapping)")
+    public void beforeMethod(){
+        System.out.println("inside beforeMethod Aspect");
+    }
+}
+```
+
+### Explanation
+
+`@annotation(org.springframework.web.bind.annotation.GetMapping)` - whenever we invoke any method, before running, springboot will check if there is any pointcut matching. When we invoke `fetchEmployee`, since it has `@GetMapping` annotation, `beforeMethod` in the `LoggingAspect` will run before `fetchEmployee`
 
 ### Args
 The `args` pointcut is used to match join points based on the arguments passed to the method.
@@ -100,6 +137,8 @@ The `args` pointcut is used to match join points based on the arguments passed t
 public void methodsWithStringArgs() {}
 ```
 This pointcut matches methods that take a `String` as the first argument.
+
+![@args-Pointcut](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/@args-Pointcut.png)
 
 ### Target
 The [`target`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fc%3A%2FUsers%2Fdharani.chrinta%2FDeveloper%2FPersonal%2Fspring-boot-daily-learnings%2Ftarget%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "c:\Users\dharani.chrinta\Developer\Personal\spring-boot-daily-learnings\target") pointcut is used to match join points based on the target object type.
