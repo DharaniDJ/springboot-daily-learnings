@@ -208,6 +208,10 @@ public Object aroundAdvice(ProceedingJoinPoint joinPoint) throws Throwable {
 }
 ```
 
+![@around-advice](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/@around-advice.png)
+
+`joinPoint.proceed()` - Invoke your method that got match with the point cut.
+
 ## Join Point
 
 A join point is a point during the execution of a program, such as the execution of a method or the handling of an exception. In Spring AOP, a join point always represents a method execution.
@@ -235,12 +239,20 @@ Spring AOP uses proxies to implement the aspects. A proxy is an object that wrap
 ### JDK Dynamic Proxies
 Spring uses JDK dynamic proxies if the target object implements at least one interface.
 
-### CGLIB Proxies
+### Code Generation Library(CGLIB) Proxies
 If the target object does not implement any interfaces, Spring uses CGLIB to create a proxy by subclassing the target object.
+
+By now, few questions we all should have:
+1. How this interception works?
+2. What if we have 1000s of pointcut, so whenever I invoke a method, does matching happens with 1000s of pointcuts?
+
+Let's understand the AOP flow, to get an answer of above doubts:
 
 ## How Interception Works
 
 Interception in Spring AOP works by creating a proxy of the target object. When a method on the target object is called, the call is intercepted by the proxy, which then applies the advice before or after delegating the call to the target object.
+
+![interception-working](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/interception-working.png)
 
 ### Example
 ```java
@@ -263,5 +275,3 @@ In this example, the `PerformanceAspect` measures the execution time of methods 
 ## Conclusion
 
 Aspect Oriented Programming in Spring Boot allows for the separation of cross-cutting concerns, making the code more modular and easier to maintain. By understanding pointcuts, advice, join points, proxy creation, and interception, you can effectively use AOP to enhance your Spring Boot applications.
-
-Test Message
