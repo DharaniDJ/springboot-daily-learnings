@@ -138,20 +138,42 @@ public void methodsWithStringArgs() {}
 ```
 This pointcut matches methods that take a `String` as the first argument.
 
+![args-Pointcut](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/args-Pointcut.png)
+
+### @args
+The `@args` pointcut is used to match any method with particular parameters and that parameter class is annotated with particular annotation.
+
 ![@args-Pointcut](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/@args-Pointcut.png)
 
-### Target
-The [`target`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fc%3A%2FUsers%2Fdharani.chrinta%2FDeveloper%2FPersonal%2Fspring-boot-daily-learnings%2Ftarget%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "c:\Users\dharani.chrinta\Developer\Personal\spring-boot-daily-learnings\target") pointcut is used to match join points based on the target object type.
+From the above image, Spring boot will look for any method that accept any argument and that argument class should have the annotation `Service`. From `EmployeeUtil` class, `employeeHelperMethod` function accepts `EmployeeDAO` as argument which is annotated with `@Service`. Since it got matched, it will execute `beforeMethod` function.
 
-```java
-@Pointcut("target(com.example.service.MyService)")
-public void targetMyService() {}
-```
-This pointcut matches join points where the target object is of type `MyService`.
+### Target
+The `target` pointcut is used to match methods based on a particular instance of a class.
+
+![target-Pointcut](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/target-Pointcut.png)
+
+From the above image, whenever an instance of `EmployeeUtil` class is used to call any method, this point cut will get matched. In `EmployeeController` class, we have `fetchEmployee` method inside which we use `EmployeeUtil` instance and call `EmployeeHelperMethod`. Because of this target point cut got matched and `beforeMethod` executed first.
+
+![target-Pointcut-Interface](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/target-Pointcut-Interface.png)
+
+## Combining multiple pointcuts
+![combining-pointcuts](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/combining-pointcuts.png)
+
+`@Before("execution(* com.conceptandcoding.learningspringboot.EmployeeController.*())")` - Any method that does not accept any arguemnt in `EmployeeController` class with any return type
+
+`@within("org.springframework.web.bind.annotation.RestController")` - Any class which has `RestController` annotation
+
+## Named Pointcuts
+
+![named-pointcuts](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/named-pointcuts.png)
+
 
 ## Advice and Its Types
 
 Advice is the action taken by an aspect at a particular join point. Spring AOP supports several types of advice:
+
+![Advice](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/Advice.png)
+
 
 ### Before
 The `@Before` advice runs before the method execution.
