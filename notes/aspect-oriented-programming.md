@@ -254,6 +254,12 @@ Interception in Spring AOP works by creating a proxy of the target object. When 
 
 ![interception-working](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/interception-working.png)
 
+![interception-explanation1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/interception-explanation1.png)
+
+![application-startup](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/application-startup.png)
+
+![Interception-code-explanation](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/Interception-code-explanation.png)
+
 ### Example
 ```java
 @Aspect
