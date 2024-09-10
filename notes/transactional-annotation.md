@@ -4,15 +4,17 @@ The `@Transactional` annotation in Spring Boot is used to manage transactions in
 
 ## Critical Section
 
-A critical section refers to a block of code that should be executed atomically. By using the `@Transactional` annotation, you can mark a method or a class as a critical section, allowing Spring Boot to handle the transaction management for you.
-
-```markdown
-In this guide, we will explore the usage of the `@Transactional` annotation in Spring Boot for managing transactions in your application.
-
-## Critical Section
-
 A critical section refers to a block of code that should be executed atomically, ensuring that either all the operations within the block succeed or none of them do. By using the `@Transactional` annotation, you can mark a method or a class as a critical section, allowing Spring Boot to handle the transaction management for you.
-```
+
+It is a code segment, where shared resources are being accessed and modified.
+
+![critical-section](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/critical-section.png)
+
+
+### Explanation for the above image
+In DB, let's say that this car has ID 10001 and currently status is available. Now there is a code segment where we are accessing this shared resource and also trying to update it. So this is why it's known as critical section. When multiple requests try to access this critical, data inconsistency can happen.
+
+Let's say four people are trying to book a cab parallely, so let's say four requests comes here in the critical section in parallel. They will all read car with id `10001` successfully. If current status is available, update it to `Booked`. For all four, it will show `your car is booked`. So during multiple requests, data inconsistency can happen.
 
 ## Class Level Transactional Annotation
 
