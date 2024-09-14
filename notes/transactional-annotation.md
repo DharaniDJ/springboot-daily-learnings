@@ -16,6 +16,28 @@ In DB, let's say that this car has ID 10001 and currently status is available. N
 
 Let's say four people are trying to book a cab parallely, so let's say four requests comes here in the critical section in parallel. They will all read car with id `10001` successfully. If current status is available, update it to `Booked`. For all four, it will show `your car is booked`. So during multiple requests, data inconsistency can happen.
 
+### Solution to the above problem
+To solve this problem, we can use `Transaction`. This helps to achieve ACID property.
+
+- A (Atomicity) : Ensures all operations within a transaction are completed successfully. If any operation fail, the entire transaction will get rollback.
+- C (Consistency) : Ensures that DB state before and after the transactions should be Consistent only.
+- I (Isolation) : Ensures that, even if multiple transactions are running in parallel, they do not interfere with each other.
+- D (Durability) : Ensures that committed transaction will never lost despite system failure or crash.
+
+```
+BEGIN_TRANSACTION:
+
+    - Debit from A  // Bussiness Logic
+    - Credit to B   // Bussiness Logic
+    if all success:
+        COMMIT;
+    Else
+        ROLLBACK;
+
+END_TRANSACTION
+```
+
+If we 
 ## Class Level Transactional Annotation
 
 When you apply the `@Transactional` annotation at the class level, it applies to all public methods within the class. This is useful when you want all methods in a service to participate in a transaction.
