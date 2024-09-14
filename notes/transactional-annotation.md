@@ -37,10 +37,40 @@ BEGIN_TRANSACTION:
 END_TRANSACTION
 ```
 
-If we 
+Let's say in our application, we have 1000 methods, where it is actually touching the DB. Here `Debit from A`, `Credit to B` are our business login, but we have to do `BEGIN_TRANSACTION`,`END_TRANSACTION`, `COMMIT`, `ROLLBACK` to achieve `ACID` properties. we have to use the above transaction for all 1000 methods. This can be simplified through `@Transactional` annotation
+
+## Transactional Annotation
+
+1. We need to add below Dependency in pom.xml
+(based on DB we are using, suppose we are using RELATIONAL DB)
+
+Spring boot Data JPA (Java Persistence API): helps to interact with Relational databases without writing much code.
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+```
+
+Since DB got involved, you have to use a particular driver also. Database driver dependency is also required.
+
+2. Activate, Transaction Management by using `@EnableTransactionManagement` in main class. (Spring boot generally Auto configure it, so we don't need to specially add it)
+
+```java
+@SpringBootApplication
+@EnableTransactionManagement
+public class SpringbootApplication {
+    public static void main(String args[]) {
+        SpringApplication.run(SpringbootApplication.class, args);
+    }
+}
+```
+
+If Spring boot does not auto configure `@EnableTransactionManagement`, `@Transactional` annotation will not be read. So it's like we have to enable the transaction management. `@Transactional` can be applied at `class` level as well as `method` level.
+
 ## Class Level Transactional Annotation
 
-When you apply the `@Transactional` annotation at the class level, it applies to all public methods within the class. This is useful when you want all methods in a service to participate in a transaction.
+When you apply the `@Transactional` annotation at the class level, it applies to all public methods but not at the private methods within the class. This is useful when you want all methods in a service to participate in a transaction.
 
 ```java
 import org.springframework.stereotype.Service;
@@ -91,111 +121,47 @@ In this example, only the `placeOrder` method will be executed within a transact
 Spring AOP (Aspect Oriented Programming) is used to manage transactions internally. When a method annotated with `@Transactional` is called, Spring creates a proxy for the target object. This proxy intercepts the method call and manages the transaction according to the specified attributes.
 
 ### Steps Involved:
+- Uses Point cut expression to search for method, which has `@Transactional` annotation like:
+@within(org.springframework.transaction.annotation.Transactional)
+
+- Once the Point cut expression matches, it runs an "Around" type Advice.
+Advice is: `invokeWithinTransaction` method present in the `TransactionalInterceptor` class.
+
+
 1. **Proxy Creation**: Spring creates a proxy for the target object.
 2. **Method Interception**: The proxy intercepts the method call.
 3. **Transaction Management**: The proxy starts a transaction before the method execution and commits or rolls back the transaction after the method execution based on the outcome.
 
 ### Example
 ```java
-@Aspect
-@Component
-public class TransactionAspect {
-
-    @Around("@annotation(org.springframework.transaction.annotation.Transactional)")
-    public Object manageTransaction(ProceedingJoinPoint joinPoint) throws Throwable {
-        // Start transaction
-        TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
-
-        Object result;
-        try {
-            result = joinPoint.proceed();
-            // Commit transaction
-            transactionManager.commit(status);
-        } catch (Throwable ex) {
-            // Rollback transaction
-            transactionManager.rollback(status);
-            throw ex;
-        }
-
-        return result;
-    }
-}
-```
-
-## Code Demo
-
-### Entity Class
-```java
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
-@Entity
-public class User {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String name;
-
-    // Getters and Setters
-}
-```
-
-### Repository Interface
-```java
-import org.springframework.data.jpa.repository.JpaRepository;
-
-public interface UserRepository extends JpaRepository<User, Long> {}
-```
-
-### Service Class
-```java
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-@Service
-public class UserService {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Transactional
-    public void createUser(User user) {
-        userRepository.save(user);
-    }
-
-    public void updateUser(User user) {
-        userRepository.save(user);
-    }
-}
-```
-
-### Controller Class
-```java
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 @RestController
-@RequestMapping("/users")
+@RequestMapping(value="/api/")
 public class UserController {
 
     @Autowired
-    private UserService userService;
+    User user;
 
-    @PostMapping
-    public void createUser(@RequestBody User user) {
-        userService.createUser(user);
-    }
-
-    @PutMapping
-    public void updateUser(@RequestBody User user) {
-        userService.updateUser(user);
+    @GetMapping(path="/updateuser")
+    public String updateUser(){
+        user.updateUser();
+        return "user is updated successfully";
     }
 }
 ```
+```java
+@Component
+public class User {
+
+    @Transactional
+    public void updateUser(){
+        System.out.println("UPDATE QUERY TO update the user db values");
+    }
+}
+```
+
+Inside the `TransactionalInterceptor` class, we have `invokeWithinTransaction` method present.
+
+![transactional-interceptor](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/transactional-interceptor.png)
 
 ## Conclusion
 
