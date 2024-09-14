@@ -21,46 +21,67 @@ The hierarchy of transaction managers allows Spring Boot to support different ty
 
 The declarative approach to transaction management in Spring Boot is achieved using annotations. The `@Transactional` annotation is the most commonly used annotation for this purpose. It can be applied at the class or method level. When applied, it ensures that the annotated method or all methods within the annotated class are executed within a transactional context.
 
-Example:
-```java
-@Service
-public class MyService {
+To specifically mention which `TransactionManager` to use, we need to create a bean of `PlatformTransactionManager` in `AppConfig` in which we create an object of our need.
 
-    @Transactional
-    public void performTransaction() {
-        // business logic here
+### AppConfig.java
+```java
+@Configuration
+public class AppConfig {
+    @Bean
+    public DataSource datasource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName("org.h2.Driver");
+        dataSource.setUrl("jdbc:h2:mem:testdb");
+        dataSource.setUsername("sa");
+        dataSource.setPassword("");
+        return dataSource;
+    }
+
+    @Bean
+    public PlatformTransactionManager userTransactionManager(DataSource dataSource){
+        return new DataSourceTransactionManager(dataSource);    // Specifically tell by creating a bean of a platform transaction manager and create an object of whatever you have to work with 
     }
 }
 ```
 
-In this example, the `performTransaction` method is executed within a transaction. If any exception occurs, the transaction will be rolled back.
+```java
+@Component
+public class UserDeclarative {
+    // Spring boot will try to find a bean with name userTransactionManager
+    @Transactional(transactionManager = "userTransactionManager")
+    public void updateUserProgrammatic() {
+        // SOME DB OPERATIONS
+        System.out.println("Insert Query ran");
+        System.out.println("Update Query ran");
+    }
+}
+```
 
 ## Programmatic Approach of Transaction Management (Transaction Template)
 
 The programmatic approach involves using the `TransactionTemplate` class. This approach provides more control over transaction management compared to the declarative approach.
 
-Example:
+- Transaction Management through code
+- Flexible but difficult to maintain. (It is difficult to use `Transaction` at 100 places, let's say)
+
+Why Flexible? Lets consider the below code:
+
 ```java
-@Service
-public class MyService {
+@Component
+public class User {
 
-    private final TransactionTemplate transactionTemplate;
-
-    @Autowired
-    public MyService(TransactionTemplate transactionTemplate) {
-        this.transactionTemplate = transactionTemplate;
-    }
-
-    public void performTransaction() {
-        transactionTemplate.execute(status -> {
-            // business logic here
-            return null;
-        });
+    @Transactional
+    public void updateUser(){
+        //1. update DB
+        //2. External API call
+        //3. update DB
     }
 }
 ```
 
-In this example, the `performTransaction` method uses the `TransactionTemplate` to execute business logic within a transaction. The `execute` method takes a `TransactionCallback` which contains the code to be executed within the transaction.
+In this example, we have `updateUser` method. we have 3 operations, 1st update DB is initial set of DB operations and after once this initial operations are success, we need to make some external API call. And after this external API call, I need to update my DB again. Now if we put `@Transactional` at the top of this method, it will cause an issue. Because `External API call` is involved here, let's say this call is taking some time(3-4 seconds may be). Now we are holding the DB connections for that time. And at the time of peak traffic where we have to open a large number of DB connections to update it. This `External API call` could be bottleneck, because these calls are the time taking process and because of this our `DB connection` is in hold for that amount of time. we cannot remove the call because of the dependency, we have to keep them together.
+
+![programmatic-approaches](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/programmatic-approaches.png)
 
 ## Different Types of Propagation
 
