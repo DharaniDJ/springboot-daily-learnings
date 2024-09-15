@@ -140,4 +140,3 @@ The `NEVER` propagation means that the method should not run within a transactio
 ![programmatic-way-output](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/programmatic-way-output.png)
 
 By understanding and using these propagation types, you can control the transactional behavior of your methods more precisely, ensuring that your application's data integrity and consistency are maintained.
-```
