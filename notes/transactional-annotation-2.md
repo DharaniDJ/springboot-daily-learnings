@@ -125,5 +125,19 @@ The `NEVER` propagation means that the method should not run within a transactio
 
 ![never-propagation](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/never-propagation.png)
 
+### Declarative way of usage:
+
+![declarative-way](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/declarative-way.png)
+
+### programmatic way of usage:
+
+![programmatic-way-1-1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/programmatic-way-1-1.png)
+
+![programmatic-way-1-2](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/programmatic-way-1-2.png)
+
+![programmatic-way-2](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/programmatic-way-2.png)
+
+![programmatic-way-output](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/programmatic-way-output.png)
+
 By understanding and using these propagation types, you can control the transactional behavior of your methods more precisely, ensuring that your application's data integrity and consistency are maintained.
 ```
