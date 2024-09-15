@@ -85,31 +85,45 @@ In this example, we have `updateUser` method. we have 3 operations, 1st update D
 
 ## Different Types of Propagation
 
-Propagation defines how transactions relate to each other. Spring supports several types of propagation:
+Propagation defines how transactions relate to each other. When we try to create a new Transaction, it first check the PROPAGATION value set, and this tell whether we have to create new transaction or not.
+
+Spring supports several types of propagation:
 
 ### REQUIRED Propagation
 
 The `REQUIRED` propagation is the default propagation type. It means that the method must run within a transaction. If a transaction already exists, the method will run within that transaction. If no transaction exists, a new one will be created.
 
+![required-propagation](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/required-propagation.png)
+
 ### REQUIRES_NEW Propagation
 
 The `REQUIRES_NEW` propagation means that a new transaction will always be started, and if an existing transaction is running, it will be suspended.
+
+![required-new-propagation](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/required-new-propagation.png)
 
 ### SUPPORTS Propagation
 
 The `SUPPORTS` propagation means that the method will run within a transaction if one exists. If no transaction exists, the method will run without a transaction.
 
+![supports-propagation](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/supports-propagation.png)
+
 ### NOT_SUPPORTED Propagation
 
 The `NOT_SUPPORTED` propagation means that the method should not run within a transaction. If a transaction exists, it will be suspended.
+
+![not-supported-propagation](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/not-supported-propagation.png)
 
 ### MANDATORY Propagation
 
 The `MANDATORY` propagation means that the method must run within an existing transaction. If no transaction exists, an exception will be thrown.
 
+![mandatory-propagation](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/mandatory-propagation.png)
+
 ### NEVER Propagation
 
 The `NEVER` propagation means that the method should not run within a transaction. If a transaction exists, an exception will be thrown.
+
+![never-propagation](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/never-propagation.png)
 
 By understanding and using these propagation types, you can control the transactional behavior of your methods more precisely, ensuring that your application's data integrity and consistency are maintained.
 ```
