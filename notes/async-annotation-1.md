@@ -7,7 +7,7 @@ The `@Async` annotation in Spring Boot is used to execute methods asynchronously
 - By default, Spring Boot uses a simple thread pool to manage asynchronous tasks. However, you can customize the thread pool to better suit your application's needs.
 - It's a collection of thread (aka workers), which are available to perform the submitted tasks.
 - Once task completed, worker thread get back to ThreadPool and wait for new task to assigned.
-- Means threads can be reused. 
+- Means threads can be reused.
 
 ![thread-pool](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/thread-pool.png)
 
@@ -27,7 +27,9 @@ When the `ThreadPoolExecutor` is configured with a minimum pool size of 2, a max
 Initially, the executor uses the core 2 threads to start processing the first 2 tasks. As these threads are busy, the next 3 tasks are placed into the `ArrayBlockingQueue`, which has a capacity of 3. This fills up the queue completely. With 5 tasks either being processed or waiting in the queue, there are still 3 tasks left to handle. Since the queue is full, the executor will create additional threads, up to the maximum pool size of 4. Thus, 2 more threads are spawned to handle the remaining tasks. When 8th task comes, since the queue is full and it exceed the maxPoolSize, it will remain alive for up to 1 hour before being terminated if no new tasks arrive, thus optimizing resource use and ensuring efficient task processing.
 
 ## @Async Annotation
-The `@Async` annotation is used to mark methods that should be executed asynchronously. When a method annotated with `@Async` is called, it will be executed in a separate thread.
+The `@Async` annotation is used to mark methods that should be executed asynchronously. When a method annotated with `@Async` is called, it will be executed in a separate thread, without blocking the main thread.
+
+`@EnableAsync` - Once Spring boot sees this annotation, it will create a bean for `async` classes which is required for processing the task. There are so many things like `async interceptor` and other classes which get involved but they will only get their objects/beans or get created when you will put this annotation. Otherwise spring unnecessarily will not create a bean for those classes.
 
 ### Example
 ```java
