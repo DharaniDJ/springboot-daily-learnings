@@ -33,8 +33,30 @@ spring-boot-daily-learnings/
 ├── mvnw.cmd
 ├── pom.xml
 └── README.md
-└── notes.md
+└── notes/
 ```
+
+## Notes
+
+Here are links to my notes taken during my learning journey with Spring Boot:
+
+- [Spring Boot Learning RoadMap](notes/roadmap.md)
+- [Spring Boot Introduction](notes/springboot-intro.md)
+- [Spring Boot setup and architecture](notes/layered-architecture.md)
+- [Introduction to Maven](notes/maven-intro.md)
+- [Annotations Part1](notes/annotations(controller-layer).md)
+- [Bean and its Lifecycle](notes/bean-intro.md)
+- [Dependency Injection](notes/dependence-injection.md)
+- [Bean Scopes](notes/bean-scope.md)
+- [Dynamically Initialized Beans](notes/dynamically-initialized-beans.md)
+- [@ConditionalOnProperty Annotation](notes/ConditionalOnProperty.md)
+- [@Profile Annotation](notes/profile-annotation.md)
+- [Spring Boot AOP (Aspect Oriented Programming)](notes/aspect-oriented-programming.md)
+- [Spring Boot Transactional Part1](notes/transactional-annotation-1.md)
+- [Spring Boot Transactional Part2](notes/transactional-annotation-2.md)
+- [Spring Boot Transactional Part3](notes/transactional-annotation-3.md)
+- [Spring Boot Async Annotation Part1](notes/async-annotation-1.md)
+- [Spring Boot Async Annotation Part2](notes/async-annotation-2.md)
 
 ## Installation
 
