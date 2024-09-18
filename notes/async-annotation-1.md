@@ -95,54 +95,41 @@ When `Task#6` comes, another thread got invoked because `maxPoolSize = 4`, same 
 
 It is recommended, as it solves all the issues existing with the previous use case.
 
+### Use case 3: Creating our own custom, ThreadPoolExecutor (Java one)
+
+![usecase3-code](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/usecase3-code.png)
+
+#### Explanation
+Inside the `AppConfig`, we are providing our own `ThreadPoolExecutor`. During Application startup, Spring boot sees that, `ThreadPoolExecutor`(Java one) Bean present, so **`it do not create its own default `ThreadPoolTaskExecutor`(spring wrapper one)`**, instead it set the default executor to `SimpleAsyncTaskExecutor`. In the above `AsyncExecutionInterception` class, `defaultExecutor` will be null and hence it returns `SimpleAsyncTaskExecutor`.
+
+Now, if we run the above code, what we see.
+
+![usecase3-output](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/usecase3-output.png)
+
+And it is not recommended at all to use `SimpleAsyncTaskExecutor`, why?
+
+It just creates new thread every time. so it may lead to 
+
+- **Thread Exhaustion**: Just blindly creating new thread with every Async request, might lead up to thread exhaustion.
+- **Thread Creation Overhead**: Since Threads are not reused, so thread management (creation, destroying) is an additional overhead.
+- **High Memory Usage**: Each threads need some memory, when we are creating these many threads, which may consume large amount of memory too, which might lead to performance degration too.
+
+So, whenever we have defined our own `ThreadPoolExecutor`(Java one), always specify the name also with Async annotation.
+
+![usecase3-code-1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/usecase3-code-1.png)
+
+![usecase3-output-1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/usecase3-output-1.png)
+
+
 ## Another Way
-Another way to achieve asynchronous execution is by using `CompletableFuture`. This allows you to run tasks asynchronously and handle the results when they are available.
+During the configuration, for AppConfig implement `AsyncConfigurer`. Once you implement this class, you need to override `getAsyncExecutor` method. We can use `ThreadPoolExecutor`(java one) or `ThreadPoolTaskExecutor`. we do not need to include executor name in `@Async`.
 
-### Example with CompletableFuture
-```java
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+Since we are not creating a bean(which is singleton), we are creating a private ThreadPoolExecutor `poolExecutor` and checking if it is null. If it is null, then only we are creating the object. Else we are using the existing one.
 
-import java.util.concurrent.CompletableFuture;
+![usecase4-code](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/usecase4-code.png)
 
-@Service
-public class DataService {
+![usecase4-output](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/usecase4-output.png)
 
-    @Async
-    public CompletableFuture<String> fetchData() {
-        // Simulate a long-running task
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return CompletableFuture.completedFuture("Data fetched");
-    }
-}
-```
-
-### Calling the CompletableFuture Method
-```java
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.concurrent.CompletableFuture;
-
-@RestController
-public class DataController {
-
-    @Autowired
-    private DataService dataService;
-
-    @GetMapping("/fetchData")
-    public CompletableFuture<String> fetchData() {
-        return dataService.fetchData();
-    }
-}
-```
-
-In this example, the `fetchData` method returns a `CompletableFuture`, allowing the caller to handle the result asynchronously.
 
 ## Conclusion
-The `@Async` annotation in Spring Boot provides a simple and effective way to execute methods asynchronously. By understanding how to use it and customize the thread pool, you can improve the performance and responsiveness of your application. Additionally, using `CompletableFuture` offers another way to handle asynchronous tasks.
+The `@Async` annotation in Spring Boot provides a simple and effective way to execute methods asynchronously. By understanding how to use it and customize the thread pool, you can improve the performance and responsiveness of your application.
