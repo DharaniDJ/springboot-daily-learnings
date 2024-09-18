@@ -78,22 +78,22 @@ In summary, we should not go with `defaultExecutor`.
 
 ### Use case 2: Creating our own custom, ThreadPoolTaskExecutor
 
-![usecase1-code](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/usecase1-code.png)
+![usecase2-code](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/usecase2-code.png)
 
 #### Explanation
-If you see the `AppConfig` class, it is empty. During the application startup, spring boot sees that, no `ThreadPoolTaskExecutor` Bean present, so it creates its default `ThreadPoolTaskExecutor` with below configurations
+Inside the `AppConfig`, we are providing our own `ThreadPoolTaskExecutor`. During Application startup, Spring boot sees that, `ThreadPoolTaskExecutor` Bean present, so it makes it default only.
 
-![threadPoolTaskExecutor-configurations](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/threadPoolTaskExecutor-configurations.png)
+And even when we use `@Async` without any name, our `myThreadPoolExecutor` will get picked only. Hence we can either use `@async` or `@async("myThreadPoolExecutor")`
 
-`ThreadPoolTaskExecutor` is nothing but a Spring boot object, which is just a wrapper around Java `ThreadPoolTaskExecutor`.
+![usecase2-output](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/usecase2-output.png)
 
-![threadPoolTaskExecutor-code](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/threadPoolTaskExecutor-code.png)
+![usecase2-sleep-output](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/usecase2-sleep-output.png)
 
-And it's not recommended at all, why?
-- **Under Utilization of Threads**: With Fixed Min pool size and Unbounded Queue(size is too big), its possible that most of the tasks will sit in the queue rather than creating new thread.
-- **High Latency**: Since queue size is too big, tasks will queue up till queue is not fill, high latency might occur during high load.
-- **Thread Exhaustion**: Lets say, if Queue also get filled up, then Executor will try to create new threads till Max pools size is not reached, which is Interger.MAX_VALUE. This can lead to thread exhaustion. And server might go down because of overhead of managing so many threads.
-- **High Memory Usage**: Each threads need some memory, when we are creating these many threads, which may consume large amount of memory too, which might lead to performance degradation too.
+To understand the queue and all, we are putting sleep in async method, to simulate load. Initially the `minPoolSize = 2`, `maxPoolSize = 4`, and `queueSize = 3`. So `Task#1` comes and it picks `Thread#1`, same happens with `Task#2` and `Thread#2`. Now no free thread are available, and any incoming task will go into queue, `Task#3`, `Task#4`, and `Task#5` goes to queue.
+
+When `Task#6` comes, another thread got invoked because `maxPoolSize = 4`, same thing happens when `Task#7` comes. Any new requests after this point will get rejected.
+
+It is recommended, as it solves all the issues existing with the previous use case.
 
 ## Another Way
 Another way to achieve asynchronous execution is by using `CompletableFuture`. This allows you to run tasks asynchronously and handle the results when they are available.
