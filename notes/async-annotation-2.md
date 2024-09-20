@@ -64,8 +64,6 @@ When we are using `@Async` annotation, we know that it will create a new thread.
 
 ![completable-future-return-type](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/completable-future-return-type.png)
 
-![methods-available-in-completable-future-interface](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/methods-available-in-completable-future-interface.png)
-
 ## Exception Handling:
 
 ![execption-handling](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/execption-handling.png)
@@ -74,11 +72,11 @@ When we are using `@Async` annotation, we know that it will create a new thread.
 1. Use `try-catch` block within the `Async` method itself.
 2. You could use Spring boot framework code or implement Custom `AsyncExecptionHandler`(Suggested way)
 
-Spring boot framework code
+<ins>Spring boot framework code</ins>
 
 ![spring-boot-framework-code](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/spring-boot-framework-code.png)
 
-Implement Custom AsyncExceptionHandler
+<ins>Implement Custom AsyncExceptionHandler</ins>
 
 ![custom-async-exception-handler](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/custom-async-exception-handler.png)
 
