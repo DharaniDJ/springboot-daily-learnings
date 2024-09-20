@@ -14,6 +14,26 @@ Method annotated with `Async` must be public. And again, AOP interception works 
 
 ![async-example-1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/async-example-1.png)
 
+## How @Async and Transaction Management works together?
+
+- **Usecase 1**: ❌ Transaction Context do not transfer from caller thread to new thread which got created by Async.
+
+![transaction-context](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/transaction-context.png)
+
+In `UserController`, we have `updateUserMethod` function where we are calling `userService.updateUser()`. For `updateUser` method in `UserService` class, we've put `@Transactional` annotation. In `updateUser()` method, we are calling `updateUserBalance()` from `UserUtility` class, which is `@Async`. The problem here is that, whenever we create a new thread, it do not carry forward the `Transactional Context`(information like `propagation level`,`thread pool`, ...etc).
+
+- **Usecase 2**: <span style="color:yellow">Use with Precaution</span>, as new thread will be created and have transaction management too but context is not same as parent thread. So Propagation will not work as expected.
+
+ ![async-usecase2](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/async-usecase2.png)
+
+In `UserController`, we have `updateUserMethod` function where we are calling `userService.updateUser()`. For `updateUser` method in `UserService` class, we've put `@Transactional` as well as `@Async`annotation. Suppose we have `@Transactional` in `updateUserMethod()` in `UserController`. Because of `@Async` in `updateUser()`, the `Transactional Context` will not get carry forward, like `Propagation` will not work as expected.
+
+- **Usecase 3**: ✅
+
+ ![async-usecase3](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/async-usecase3.png)
+
+In `UserController`, we have `updateUserMethod` function where we are calling `userService.updateUser()`. For `updateUser` method in `UserService` class, we've put `@Async`annotation. Your main thread is free right now, it do not have to wait for `updateUser()` method. Now it calls `userUtility.updateUser()` which has `@Transactional` and now everything runs in a transaction, anything fails rollback will happen. In summary, what we have done is, we have used a separate thread to do the transactional work and our main thread is free totally.
+
 ## Enabling Async Support
 
 To use the `@Async` annotation, you need to enable async support in your Spring Boot application. This can be done by adding the `@EnableAsync` annotation to one of your configuration classes.
@@ -30,33 +50,39 @@ public class AsyncConfig {
 }
 ```
 
-## Using the @Async Annotation
+## Async method return type
 
 You can apply the `@Async` annotation to any method that you want to run asynchronously. The method should return a `Future`, `CompletableFuture`, or `ListenableFuture` if you need to get the result of the asynchronous operation.
 
-Example:
-```java
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import java.util.concurrent.CompletableFuture;
+### **Using Future**(Deprecated now):
 
-@Service
-public class MyService {
+![future-return-type](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/future-return-type.png)
 
-    @Async
-    public CompletableFuture<String> asyncMethod() {
-        // Simulate a long-running task
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return CompletableFuture.completedFuture("Task Completed");
-    }
-}
-```
+When we are using `@Async` annotation, we know that it will create a new thread. If we want to get the output of that new thread, that's where `Future` and `CompletableFuture` comes into picture.
 
-In this example, the `asyncMethod` will run in a separate thread, allowing the main thread to continue processing.
+### **Using CompletableFuture**(Introduced in Java8):
+
+![completable-future-return-type](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/completable-future-return-type.png)
+
+![methods-available-in-completable-future-interface](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/methods-available-in-completable-future-interface.png)
+
+## Exception Handling:
+
+![execption-handling](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/execption-handling.png)
+
+**For methods that do not return anything, how are you going to handle the exception in your main thread?**
+1. Use `try-catch` block within the `Async` method itself.
+2. You could use Spring boot framework code or implement Custom `AsyncExecptionHandler`(Suggested way)
+
+Spring boot framework code
+
+![spring-boot-framework-code](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/spring-boot-framework-code.png)
+
+Implement Custom AsyncExceptionHandler
+
+![custom-async-exception-handler](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/custom-async-exception-handler.png)
+
+- we just need to implement `AsyncConfigurer` and in `getAsyncUncaughtException()` method, return `AsyncUncaughtExceptionHandler`. By doing, our custom AsyncExceptionHandler will get returned.
 
 ## Important Interview Questions on Async Annotation
 
