@@ -57,6 +57,7 @@ Here are links to my notes taken during my learning journey with Spring Boot:
 - [Spring Boot Transactional Part3](notes/transactional-annotation-3.md)
 - [Spring Boot Async Annotation Part1](notes/async-annotation-1.md)
 - [Spring Boot Async Annotation Part2](notes/async-annotation-2.md)
+- [Custom Interceptors](notes/custom-interceptors.md)
 
 ## Installation
 
