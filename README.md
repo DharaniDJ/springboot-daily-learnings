@@ -58,6 +58,7 @@ Here are links to my notes taken during my learning journey with Spring Boot:
 - [Spring Boot Async Annotation Part1](notes/async-annotation-1.md)
 - [Spring Boot Async Annotation Part2](notes/async-annotation-2.md)
 - [Custom Interceptors](notes/custom-interceptors.md)
+- [filters-vs-interceptor](notes/filters-vs-interceptor.md)
 
 ## Installation
 
