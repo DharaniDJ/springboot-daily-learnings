@@ -24,52 +24,63 @@ A custom interceptor can be used to process requests before they reach the speci
 ![custom-interceptor-before-controller-output](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/custom-interceptor-before-controller-output.png)
 
 ## Custom Interceptor for Requests After Reaching the Controller
-A custom interceptor can also be used to process requests after they have been handled by the controller. This is useful for tasks such as logging response details, modifying the response object, or performing cleanup operations.
+A custom interceptor can also be used to process requests after they have been handled by the controller. This is useful for tasks such as logging response details, modifying the response object, or performing cleanup operations. Let's break it into 2 steps.
+
+## Step 1: Creation of Custom Annotation
+we can create Custom Annotation using keyword `@interface` java Annotation.
 
 ### Example
 ```java
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerInterceptor;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MyCustomAnnotation {
+}
+```
 
-@Component
-public class ResponseInterceptor implements HandlerInterceptor {
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        System.out.println("Request and Response is completed");
-        // Perform operations after the request has been handled by the controller
+```java
+public class User {
+    @MyCustomAnnotation
+    public void updateUser(){
+        // some business logic
     }
 }
 ```
 
-## Step 1: Creation of Custom Annotation
-Custom annotations can be created to provide metadata for interceptors. These annotations can be used to specify which methods or classes should be intercepted.
-
-### Example
-```java
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface LogExecutionTime {
-}
-```
-
 ### Types of Meta Annotation Properties with Code Examples
-- **@Target**: Specifies the kinds of elements an annotation type can be applied to.
-- **@Retention**: Specifies how long annotations with the annotated type are to be retained.
+- **@Target**: Specifies the kinds of elements an annotation type can be applied to(like method or class or constructor).
 
 ```java
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface LogExecutionTime {
+@Target({ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
+public @interface MyCustomAnnotation {
 }
 ```
+
+- **@Retention**: Specifies how long annotations with the annotated type are to be retained.
+![@retention](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/@retention.png)
+
+```
+1. RententionPolicy.SOURCE:  Annotation will be discarded by compiler itself and its not even recorded in .class file.
+2. RententionPolicy.CLASS:   Annotation will be recorded in .class file but ignored by JVM during run time.
+3. RententionPolicy.RUNTIME: Annotation will be recorded in .class file and also available during run time.
+```
+
+```java
+@Target({ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
+public @interface MyCustomAnnotation {
+}
+```
+
+### How to create Custom Annotation with methods (more like a fields):
+- No parameter, no body
+- Return type is restricted to:
+    - Primitive type (int, boolean, double...etc).
+    - String
+    - Enum
+    - Class<?>
+    - Annotation
+    - Array of above types
+
+![custom-annotation-return-types](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/custom-annotation-return-types.png)
 
 ## Step 2: Creation of Custom Interceptor
 To create a custom interceptor, you need to implement the `HandlerInterceptor` interface and override its methods. You can then register the interceptor with Spring Boot.
