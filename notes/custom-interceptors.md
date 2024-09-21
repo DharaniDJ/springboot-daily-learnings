@@ -83,54 +83,18 @@ public @interface MyCustomAnnotation {
 ![custom-annotation-return-types](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/custom-annotation-return-types.png)
 
 ## Step 2: Creation of Custom Interceptor
-To create a custom interceptor, you need to implement the `HandlerInterceptor` interface and override its methods. You can then register the interceptor with Spring Boot.
-
 ### Example
-```java
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerInterceptor;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+![custom-interceptor-1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/custom-interceptor-1.png)
 
-@Component
-public class CustomInterceptor implements HandlerInterceptor {
+![custom-interceptor-2](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/custom-interceptor-2.png)
 
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        System.out.println("Custom Interceptor: Pre Handle method is Calling");
-        // Perform operations before the request reaches the controller
-        return true; // Continue with the next interceptor or the controller
-    }
+### Output
+![custom-interceptor-output](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/custom-interceptor-output.png)
 
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        System.out.println("Custom Interceptor: Request and Response is completed");
-        // Perform operations after the request has been handled by the controller
-    }
-}
-```
+### Explanation
+we are creating a `UserController` class, we have `getUser` method with `/getUser` path. The `getUser` is invoking `user.getUser()` which is annotated with `@Component` which means bean is created by spring. Here `getUser` in `User` class is annotated with `@MyCustomAnnotation(name = "user")`.
 
-### Registering the Interceptor
-You need to register the custom interceptor with Spring Boot by adding it to the `WebMvcConfigurer`.
-
-```java
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-@Configuration
-public class WebConfig implements WebMvcConfigurer {
-
-    @Autowired
-    private CustomInterceptor customInterceptor;
-
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(customInterceptor);
-    }
-}
-```
+Now to write an interceptor, we are creating a class `MyCustomInterceptor`. `@Aspect` means that this class will be considered as an interceptor where we will have a point cut and an advice. We have a method `invoke` where we are providing one point cut `@annotation(com.conceptandcoding.learningspringboot.CustomInterceptor.MyCustomAnnotation)` (which will look for the provided annotation). `@annotation` point cut means, run this advice/method whenever you see this annotation (i.e MyCustomAnnotation)
 
 ## Conclusion
 Custom interceptors in Spring Boot provide a powerful way to process HTTP requests before they reach the controller and after they leave the controller. By creating custom annotations and interceptors, you can handle specific requirements such as logging, authentication, and modifying request/response objects. This guide has covered the creation and registration of custom interceptors with detailed code examples and explanations.
