@@ -78,3 +78,38 @@ public class SecondServlet extends HttpServlet {
 ### Interceptors:
 - Is used when we want to intercept HTTP Request and Response and add logic specific to a particular servlet.
 - we can have many interceptors and have ordering between them too.
+
+## Multiple Interceptors and its Ordering:
+
+In `Custom Interceptors.md` file., we already saw, how to add 1 interceptor.
+How `preHandle`, `postHandle` and `afterCompletion` comes into the picture.
+
+Now here, will show how to add more than 1.
+
+Also, if `preHandle` returns false, next interceptor and controller will not get invoked itself.
+
+![multiple-interceptors](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/multiple-interceptors.png)
+
+Since we added `myCustomInterceptor1` first and then `myCustomInterceptor2`. `myCustomInterceptor1` will be executed first.
+```
+Request  -> IC1, IC2
+Response -> IC2, IC1
+```
+
+![multiple-interceptors-output](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/multiple-interceptors-output.png)
+
+## How to add filters
+
+![filter1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/filter1.png)
+
+Once the object of `MyFilter1` gets created, `init` method gets invoked only one time. In `doFilter`, it does something before it process the request to the next filter (similar to recurrsion).
+
+![filter2](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/filter2.png)
+
+![filter-registration](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/filter-registration.png)
+
+Here in `AppConfig`, we are creating beans for `MyFilter1` and `MyFilter2`. In `MyFirstFilter` and `MySecondFilter`, we are registering our filters, adding all the urls and setting the ordering.
+
+![multiple-filters-output](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/multiple-filters-output.png)
+
+![filters-interceptors-output](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/filters-interceptors-output.png)
