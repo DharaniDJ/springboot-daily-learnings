@@ -21,82 +21,84 @@ Body should be last, actually its kind of usign Builder design pattern, so `stat
 
 ![header](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/header.png)
 
+When we don't want to add any body in the response, we should use `build` method. `<T> ResponseEntity <T> build()`
+
+```java
+@GetMapping(path="/get-user")
+public ResponseEntity<Void> getUser(){
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("header1", "value1");
+    headers.add("header2", "value2");
+
+    return ResponseEntity.status(HttpStatus.OK).headers(headers).build();
+}
+```
+
+### Example
+
+By default, 200 OK is the status code set
+
+```java
+@RestController
+@RequestMapping(path="/api")
+public class UserController{
+
+    @GetMapping(path="/get-user")
+    public User getUser(){
+        User responseObj = new User("Dharani", 26);
+        return responseObj;
+    }
+}
+```
+## @ResponseBody in Spring Boot
+When we return plain string or POJO directly from the class, then `@ResponseBody` annotation is required
+
+Why?
+It tells to considered value as `Response Body` and not as a `View`
+
+In the above example, we did not use `@ResponseBody`, but `@RestController` automatically puts `@ResponseBody` to all the methods.
+
+![rest-controller](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/rest-controller.png)
+
+But lets say, if we use `@Controller` instead, then below code will throw exception.
+
+![controller](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/controller.png)
+
+Because, Return value is treated as "view" and spring boot will try to look for file with the given name "XYZ" which do not exist.
+
 ## HTTP Response Codes
+
+![response-code](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/response-code.png)
 
 ### 1xx: Informational
 
 1xx status codes indicate that the request has been received and the process is continuing.
 
-- **100 Continue**: The server has received the request headers, and the client should proceed to send the request body.
-- **101 Switching Protocols**: The requester has asked the server to switch protocols, and the server has agreed to do so.
+![1xx status codes](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/1xx.png)
 
 ### 2xx: Success
 
 2xx status codes indicate that the request was successfully received, understood, and accepted.
 
-- **200 OK**: The request has succeeded. The meaning of success depends on the HTTP method.
-- **201 Created**: The request has been fulfilled, resulting in the creation of a new resource.
-- **202 Accepted**: The request has been accepted for processing, but the processing has not been completed.
-- **204 No Content**: The server successfully processed the request, but is not returning any content.
-
-Example:
-```java
-@GetMapping("/created")
-public ResponseEntity<String> created() {
-    return new ResponseEntity<>("Resource created", HttpStatus.CREATED);
-}
-```
+![2xx status codes](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/2xx.png)
 
 ### 3xx: Redirection
 
 3xx status codes indicate that further action needs to be taken by the user agent to fulfill the request.
 
-- **301 Moved Permanently**: The requested resource has been assigned a new permanent URI.
-- **302 Found**: The requested resource resides temporarily under a different URI.
-- **304 Not Modified**: Indicates that the resource has not been modified since the version specified by the request headers.
-
-Example:
-```java
-@GetMapping("/redirect")
-public ResponseEntity<Void> redirect() {
-    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
-                         .header("Location", "https://new-url.com")
-                         .build();
-}
-```
+![3xx status codes](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/3xx.png)
 
 ### 4xx: Client Error
 
 4xx status codes indicate that the client seems to have erred.
 
-- **400 Bad Request**: The server could not understand the request due to invalid syntax.
-- **401 Unauthorized**: The client must authenticate itself to get the requested response.
-- **403 Forbidden**: The client does not have access rights to the content.
-- **404 Not Found**: The server can not find the requested resource.
-
-Example:
-```java
-@GetMapping("/bad-request")
-public ResponseEntity<String> badRequest() {
-    return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
-}
-```
+![4xx status codes](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/4xx.png)
 
 ### 5xx: Server Error
 
 5xx status codes indicate that the server failed to fulfill a valid request.
 
-- **500 Internal Server Error**: The server has encountered a situation it doesn't know how to handle.
-- **502 Bad Gateway**: The server, while acting as a gateway or proxy, received an invalid response from the upstream server.
-- **503 Service Unavailable**: The server is not ready to handle the request.
-
-Example:
-```java
-@GetMapping("/server-error")
-public ResponseEntity<String> serverError() {
-    return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
-}
-```
+![5xx status codes](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/5xx.png)
 
 ## Conclusion
 
