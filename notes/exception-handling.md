@@ -75,44 +75,51 @@ We are throwing our `CustomException` and next we are catching the exception. He
 ![DefaultErrorAttribuesOutput](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/DefaultErrorAttribuesOutput.png)
 ---
 
-## Using @ExceptionHandler and @ControllerAdvice
+## `ExceptionHandlerExceptionResolver`
+
+Responsible for handling `@ExceptionHandler` and `@ControllerAdvice`
 
 ### `@ExceptionHandler`
 
 The `@ExceptionHandler` annotation is used at the controller level to handle specific exceptions locally. When an exception is thrown in a controller method, Spring checks if any `@ExceptionHandler` method is present in the same controller to handle it. This allows for fine-grained control over exceptions within each controller.
 
-```java
-@Controller
-public class UserController {
+![ControllerLevelException](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ControllerLevelException.png)
 
-    @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(CustomException ex) {
-        ErrorResponse error = new ErrorResponse("Custom Error", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-}
-```
+Here, the `@ExceptionHandler` intercepts `CustomException` in `UserController`, allowing a custom response to be returned. So what would happen here is that whenever in this controller, no matter how many methods you have, if any one method throws a `CustomException`, `handleCustomException` would catch it
 
-Here, the `@ExceptionHandler` intercepts `CustomException` in `UserController`, allowing a custom response to be returned. 
+Use-case just to show returning Error Response object instead of just message:
+[ControllerLevelErrorResponse](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ControllerLevelErrorResponse.png)
+
+Use-case just to show multiple `@ExceptionHandler` in single Controller class:
+[MultipleExceptionHandlers](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/MultipleExceptionHandlers.png)
+
+Use-case to show one `@ExceptionHandler` handling multiple exceptions:
+[SingleExceptionHandler](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/SingleExceptionHandler.png)
+
+Use-case just to show `@ExceptionHandler` not returning ResponseEntity and let **DefaultErrorAttributes** to create the ResponseEntity.
+[DefaultErrorAttributesExceptionHandler](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/DefaultErrorAttributesExceptionHandler.png)
+
+Function annotated with `@ExceptionHandler` can take  HTTP servlet response, HTTP request and Exception. If your `@ExceptionHandler` is accepting only one, or taking care of only one exception, you can write exact same exception in the input.
 
 ### `@ControllerAdvice`
 
+Problem with Controller level @ExceptionHandler is:
+- If multiple controller has the same type of Exceptions then same handling we might to do in multiple controller.
+- Which is nothing but a code duplication.
+
 For handling exceptions globally across multiple controllers, use `@ControllerAdvice`. This annotation lets us define exception-handling logic in a single class, preventing duplicate code across controllers.
 
-```java
-@ControllerAdvice
-public class GlobalExceptionHandler {
+[ControllerAdvice](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ControllerAdvice.png)
 
-    @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> handleGlobalCustomException(CustomException ex) {
-        ErrorResponse error = new ErrorResponse("Global Custom Error", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-}
-```
+With `@ControllerAdvice`, any `CustomException` thrown across the application will be handled by `GlobalExceptionHandler`, unless a **specific `@ExceptionHandler` is defined in a controller**.
 
-With `@ControllerAdvice`, any `CustomException` thrown across the application will be handled by `GlobalExceptionHandler`, unless a specific `@ExceptionHandler` is defined in a controller.
+[ControllerLevel-vs-GlobalLevel](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ControllerLevel-vs-GlobalLevel.png)
 
+What if there are two handlers which can handle an exception, which one will be given priority:
+
+It will always follow an hierarch, from bottom to up(First look for exact match if not, check for its parent and so on...)
+
+[MultipleHandlersToHandle](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/MultipleHandlersToHandle.png)
 ---
 
 ## @ResponseStatus Annotation
