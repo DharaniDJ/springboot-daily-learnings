@@ -62,6 +62,7 @@ Here are links to my notes taken during my learning journey with Spring Boot:
 - [Spring boot HATEOAS](notes/hateoas.md)
 - [Spring boot ResponseEntity and Response Codes](notes/response-codes-types.md)
 - [Spring boot Exceptional Handling](notes/exception-handling.md)
+- [Spring boot JPA (Part-1) | JDBC Template](notes/jdbc-template.md)
 ## Installation
 
 To install and run the Spring Boot application, follow these steps:
