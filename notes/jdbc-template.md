@@ -1,7 +1,18 @@
-### JPA | JDBC Template Notes
+### JPA (Part 1) | JDBC Template
+We have reached to a stage where we have to insert data into the database, how we can do that. So that's where the JPA, JDBC comes into the picture okay. So before even jumping into the JPA, we have to first understand the complete sequence.
+
+Let's say you are writing a springboot application. You have an application logic or you have written so many beans okay. Now what you do is if you have to use JPA, you have to interact with the APIs, which are provided by JPA. so always remember that JPA is mostly an interface, which means it does not provide you with the implementation. Implementation is provided by `Hibernate` or `openJPA`.
+
+So your application talks to JPA, and JPA internally has to be implemented be some other component which you decide. Generally Hibernate is the most popular one. so hibernate internally utilize JDBC APIs(interface). And then there are specific DB drivers. so this DB drivers are nothing but an implementation of this JDBC APIs.
+
+Lets say you are using a MySQL DB, then there would be a specific DB driver for it. Let's say it is `Connector/J` which is very specific for MySQL which knows how to connect to MySQL.
+
+![JPAFlow](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JPAFlow.png)
+
+Now there is something called `ORM Framework` (Object Relational Mapping), it is nothing but a bridge between Java object and your relational databases. So remember JPA, JDBC are just for maintaining relational databases.
 
 #### 1. Introduction to JDBC
-- JDBC (Java Database Connectivity) is an API that allows Java applications to interact with databases.
+- JDBC (Java Database Connectivity) is an API interface that allows Java applications to interact with databases.
 - It provides methods to connect to a database, execute queries, and process the results.
 - JDBC is an interface, and the actual implementation is provided by database-specific drivers (e.g., MySQL, PostgreSQL).
 
