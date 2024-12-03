@@ -16,6 +16,27 @@ Now there is something called `ORM Framework` (Object Relational Mapping), it is
 - It provides methods to connect to a database, execute queries, and process the results.
 - JDBC is an interface, and the actual implementation is provided by database-specific drivers (e.g., MySQL, PostgreSQL).
 
+- For example: 
+  1. MySQL
+      - Driver : Connector/J
+      - Class : com.mysql.cj.jdbc.Driver
+  2. PostgreSQL
+      - Driver : PostgreSQL JDBC Driver
+      - Class : org.postgresql.Driver
+  3. H2(in-memory)
+      - Driver : H2 Database Engine
+      - Class : org.h2.Driver
+
+##### Using JDBC without Springboot
+
+![JDBCWithoutSpringboot](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JDBCWithoutSpringboot.png)
+
+I have created one public class database connection as the class name. I have created one method called `getConnection` and its returning me the connection object. The first step is to load the driver into the JVM. Now once the driver is loaded into the JVM, the second step is to establish a connection with DB.
+
+I also created another class `UserDAO` in which I wrote `createUserTable`, `createUser`, `readUsers`. First thing you need is get a connection of a database. So it's creating a new database connection object and calling the getConnection method. Once you get the connection then you can run the query.
+
+If any exception comes, you have to handle the exception and in finally block you have to close the statement and connection.
+15:05
 #### 2. Plain JDBC Handling
 - To use JDBC, you need to load the database driver, establish a connection, create statements, execute queries, and handle results.
 - Example:
