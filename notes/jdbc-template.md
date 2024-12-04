@@ -27,7 +27,7 @@ Now there is something called `ORM Framework` (Object Relational Mapping), it is
       - Driver : H2 Database Engine
       - Class : org.h2.Driver
 
-##### Using JDBC without Springboot
+#### 2. Plain JDBC Handling
 
 ![JDBCWithoutSpringboot](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JDBCWithoutSpringboot.png)
 
@@ -36,22 +36,13 @@ I have created one public class database connection as the class name. I have cr
 I also created another class `UserDAO` in which I wrote `createUserTable`, `createUser`, `readUsers`. First thing you need is get a connection of a database. So it's creating a new database connection object and calling the getConnection method. Once you get the connection then you can run the query.
 
 If any exception comes, you have to handle the exception and in finally block you have to close the statement and connection.
-15:05
-#### 2. Plain JDBC Handling
-- To use JDBC, you need to load the database driver, establish a connection, create statements, execute queries, and handle results.
-- Example:
-  ```java
-  Class.forName("com.mysql.jdbc.Driver");
-  Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb", "user", "password");
-  Statement statement = connection.createStatement();
-  ResultSet resultSet = statement.executeQuery("SELECT * FROM users");
-  while (resultSet.next()) {
-      // Process results
-  }
-  resultSet.close();
-  statement.close();
-  connection.close();
-  ```
+
+If we see above example:
+- Connection
+- Statement
+- PreparedStatement
+- ResultSet etc.
+All are interfaces which JDBC provide and each specific driver provide the implementation for it.
 
 #### 3. Problems with Plain JDBC
 - **Boilerplate Code**: Requires repetitive code for loading drivers, creating connections, and handling exceptions.
@@ -78,33 +69,21 @@ If any exception comes, you have to handle the exception and in finally block yo
   spring.datasource.url=jdbc:h2:mem:testdb
   spring.datasource.driverClassName=org.h2.Driver
   spring.datasource.username=sa
-  spring.datasource.password=password
+  spring.datasource.password=
+  spring.h2.console.enabled=true
   ```
+[JDBCWithSpringBoot](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JDBCWithSpringBoot.png)
+[JDBCWithSpringBoot1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JDBCWithSpringBoot1.png)
+
+- **Explanation**:
+I have created a basic POJO of `User` which has `userId`, `userName`, `age`. Second, I have created `UserRepository` class annotated with `@Repository`. Unlike Plain JDBC, when an SQL exception comes, it gives a granular level of exception. In the `UserRepository` class, I've added a dependency of JdbcTemplate which helps use to remove all the boiler code. I also have the same methods I have written previously. One is to create table, one is insert user and another is read user. Here I haven't creating DB Connection. I've not written any finally block where I am closing the DB connection or closing the prepared statement. All I'm using is just the JDBC Template execute to execute the plain query.
+
+  I've written `UserService` in which i've `userRepository` as dependency. This class is nothing but a service class calling the repository class and it is your business logic class.
 
 #### 5. Spring Boot JDBC Helper Methods
-- **JdbcTemplate**: Provides methods for executing SQL queries, updates, and batch operations.
-  - **Execute**: For executing DDL statements.
-    ```java
-    jdbcTemplate.execute("CREATE TABLE users (id INT, name VARCHAR(50))");
-    ```
-  - **Update**: For executing DML statements (INSERT, UPDATE, DELETE).
-    ```java
-    jdbcTemplate.update("INSERT INTO users (id, name) VALUES (?, ?)", 1, "John");
-    ```
-  - **Query**: For executing SELECT statements and mapping results.
-    ```java
-    List<User> users = jdbcTemplate.query("SELECT * FROM users", new RowMapper<User>() {
-        public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-            User user = new User();
-            user.setId(rs.getInt("id"));
-            user.setName(rs.getString("name"));
-            return user;
-        }
-    });
-    ```
 
-- **Exception Handling**: Spring translates SQL exceptions into more specific exceptions (e.g., `DataIntegrityViolationException`).
+[HikariCP](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/HikariCP.png)
 
-- **Connection Pooling**: Spring Boot uses HikariCP by default for connection pooling, which can be configured in `application.properties`.
+[AppConfigDataSource](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/AppConfigDataSource.png)
 
-These notes provide a comprehensive overview of JDBC and how Spring Boot simplifies its usage with `JdbcTemplate`.
+[JDBCTemplateMethods](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JDBCTemplateMethods.png)
