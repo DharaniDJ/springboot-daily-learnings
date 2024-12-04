@@ -72,8 +72,8 @@ All are interfaces which JDBC provide and each specific driver provide the imple
   spring.datasource.password=
   spring.h2.console.enabled=true
   ```
-[JDBCWithSpringBoot](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JDBCWithSpringBoot.png)
-[JDBCWithSpringBoot1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JDBCWithSpringBoot1.png)
+![JDBCWithSpringBoot](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JDBCWithSpringBoot.png)
+![JDBCWithSpringBoot1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JDBCWithSpringBoot1.png)
 
 - **Explanation**:
 I have created a basic POJO of `User` which has `userId`, `userName`, `age`. Second, I have created `UserRepository` class annotated with `@Repository`. Unlike Plain JDBC, when an SQL exception comes, it gives a granular level of exception. In the `UserRepository` class, I've added a dependency of JdbcTemplate which helps use to remove all the boiler code. I also have the same methods I have written previously. One is to create table, one is insert user and another is read user. Here I haven't creating DB Connection. I've not written any finally block where I am closing the DB connection or closing the prepared statement. All I'm using is just the JDBC Template execute to execute the plain query.
@@ -82,8 +82,8 @@ I have created a basic POJO of `User` which has `userId`, `userName`, `age`. Sec
 
 #### 5. Spring Boot JDBC Helper Methods
 
-[HikariCP](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/HikariCP.png)
+![HikariCP](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/HikariCP.png)
 
-[AppConfigDataSource](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/AppConfigDataSource.png)
+![AppConfigDataSource](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/AppConfigDataSource.png)
 
-[JDBCTemplateMethods](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JDBCTemplateMethods.png)
+![JDBCTemplateMethods](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JDBCTemplateMethods.png)
