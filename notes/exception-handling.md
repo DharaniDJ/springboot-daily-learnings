@@ -89,19 +89,19 @@ Here, the `@ExceptionHandler` intercepts `CustomException` in `UserController`, 
 
 #### Use-case just to show returning Error Response object instead of just message:
 
-[ControllerLevelErrorResponse](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ControllerLevelErrorResponse.png)
+![ControllerLevelErrorResponse](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ControllerLevelErrorResponse.png)
 
 #### Use-case just to show multiple `@ExceptionHandler` in single Controller class:
 
-[MultipleExceptionHandlers](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/MultipleExceptionHandlers.png)
+![MultipleExceptionHandlers](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/MultipleExceptionHandlers.png)
 
 #### Use-case to show one `@ExceptionHandler` handling multiple exceptions:
 
-[SingleExceptionHandler](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/SingleExceptionHandler.png)
+![SingleExceptionHandler](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/SingleExceptionHandler.png)
 
 #### Use-case just to show `@ExceptionHandler` not returning ResponseEntity and let **DefaultErrorAttributes** to create the ResponseEntity.
 
-[DefaultErrorAttributesExceptionHandler](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/DefaultErrorAttributesExceptionHandler.png)
+![DefaultErrorAttributesExceptionHandler](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/DefaultErrorAttributesExceptionHandler.png)
 
 Function annotated with `@ExceptionHandler` can take  HTTP servlet response, HTTP request and Exception. If your `@ExceptionHandler` is accepting only one, or taking care of only one exception, you can write exact same exception in the input.
 
@@ -113,17 +113,17 @@ Problem with Controller level @ExceptionHandler is:
 
 For handling exceptions globally across multiple controllers, use `@ControllerAdvice`. This annotation lets us define exception-handling logic in a single class, preventing duplicate code across controllers.
 
-[ControllerAdvice](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ControllerAdvice.png)
+![ControllerAdvice](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ControllerAdvice.png)
 
 With `@ControllerAdvice`, any `CustomException` thrown across the application will be handled by `GlobalExceptionHandler`, unless a **specific `@ExceptionHandler` is defined in a controller**.
 
-[ControllerLevel-vs-GlobalLevel](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ControllerLevel-vs-GlobalLevel.png)
+![ControllerLevel-vs-GlobalLevel](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ControllerLevel-vs-GlobalLevel.png)
 
 What if there are two handlers which can handle an exception, which one will be given priority:
 
 It will always follow an hierarch, from bottom to up(First look for exact match if not, check for its parent and so on...)
 
-[MultipleHandlersToHandle](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/MultipleHandlersToHandle.png)
+![MultipleHandlersToHandle](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/MultipleHandlersToHandle.png)
 
 ---
 
@@ -133,13 +133,13 @@ Handles Uncaught exception annotated with `@ResponseStatus` annotation.
 
 ### Use-case 1:
 
-[ResponseStatusExceptionResolver1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ResponseStatusExceptionResolver1.png)
+![ResponseStatusExceptionResolver1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ResponseStatusExceptionResolver1.png)
 
 Here if you see, I have put a response status annotation at top of this custom exception class with status `HttpStatus.BAD_REQUEST`. So now what happens is I am throwing an exception and not returning response entity. So Control will go to resolvers, first it will go to `ExceptionHandlerExceptionResolver` which don't know how to handle custom exception because there is no `@ExceptionHandler`. The second it goes to `ResponseStatusExceptionResolver` and it will go to `CustomException` and see if it has `@ResponseStatus` annotation. Since it has `@ResponseStatus`, it would be able to handle it.
 
 **ONLY UNCAUGHT EXCEPTION WILL BE HANDLED BY @ResponseStatus**
 
-[ResponseStatusExceptionResolver2](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ResponseStatusExceptionResolver2.png)
+![ResponseStatusExceptionResolver2](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ResponseStatusExceptionResolver2.png)
 
 It will give more priority to `Invalid Request Passed` than `UserID is missing`.
 
@@ -147,7 +147,7 @@ It will give more priority to `Invalid Request Passed` than `UserID is missing`.
 
 Again `ResponseStatusExceptionResolver` handles Uncaught exception annotated with `@ResponseStatus` annotation but if used with `@ExceptionHandler` then it will not be handled by `ResponseStatusExceptionResolver`, it will be handled by Spring request handling mechanism itself.
 
-[ResponseStatusExceptionResolver3](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ResponseStatusExceptionResolver3.png)
+![ResponseStatusExceptionResolver3](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ResponseStatusExceptionResolver3.png)
 
 I am throwing an exception in `getUser` function and in this `CustomException`, I'm not using `@ResponseStatus` here. I have written one custom exception handler method which takes care of this custom exception. I have also annotated with `@ResponseStatus` to custom exception handler.
 
@@ -155,11 +155,11 @@ So now here if you see in the exception handler, i am doing two different things
 
 First it goes to `ExceptionHandlerExceptionResolver` and here it creates a response entity itself. so it will definitely will not go to second resolver since it is handled by previous resolver. After `ExceptionHandlerExceptionResolver` handles, spring framework(`ServletInvocableHandlerMethod.java`) handles the response status afterward.
 
-[ServletInvocableHandlerMethod](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ServletInvocableHandlerMethod.png)
+![ServletInvocableHandlerMethod](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ServletInvocableHandlerMethod.png)
 
 What if `@ExceptionHandler` method, set Response status and message itself instead of returning the response entity?
 
-[ResponseStatusExceptionResolver5](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ResponseStatusExceptionResolver5.png)
+![ResponseStatusExceptionResolver5](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ResponseStatusExceptionResolver5.png)
 
 So its advisable not to use together `@ExceptionHandler` and `@ResponseStatus` together to avoid confusion. But if you have to, use like below:
 ---
