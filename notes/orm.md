@@ -6,23 +6,16 @@ Object-Relational Mapping (ORM) is a technique that allows developers to map obj
 
 ## 2. Setup of JPA Happy Flow
 
+We will see what all things are required to run one single program using JPA.
+
 ### Dependencies
 
-To set up JPA in a Spring Boot application, add the following dependencies to your 
-
-pom.xml
-
-:
+To set up JPA in a Spring Boot application, add the following dependencies to your `pom.xml`
 
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-data-jpa</artifactId>
-</dependency>
-<dependency>
-    <groupId>com.h2database</groupId>
-    <artifactId>h2</artifactId>
-    <scope>runtime</scope>
 </dependency>
 ```
 
@@ -34,9 +27,7 @@ Configure the database connection in `application.properties`:
 spring.datasource.url=jdbc:h2:mem:testdb
 spring.datasource.driverClassName=org.h2.Driver
 spring.datasource.username=sa
-spring.datasource.password=password
-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
-spring.h2.console.enabled=true
+spring.datasource.password=
 ```
 
 ### Entity Class
@@ -44,18 +35,25 @@ spring.h2.console.enabled=true
 Create an entity class annotated with `@Entity`:
 
 ```java
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
 @Entity
-public class User {
+public class UserDetails {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
     private String email;
+
+    // Constructors
+    public UserDetails(){
+
+    }
+
+    public UserDetails(String name, String email){
+        this.name = name;
+        this.email = email;
+    }
 
     // Getters and Setters
 }
@@ -66,60 +64,58 @@ public class User {
 Create a repository interface extending `JpaRepository`:
 
 ```java
-import org.springframework.data.jpa.repository.JpaRepository;
-
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserDetailsRepository extends JpaRepository<UserDetails, Long> {
 }
 ```
+
+It exposes APIs to insert, fetch, modify, etc...
 
 ### Service and Controller
 
 Create a service and controller to handle business logic and HTTP requests:
 
 ```java
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-
 @Service
-public class UserService {
+public class UserDetailsService {
     @Autowired
-    private UserRepository userRepository;
+    private UserDetailsRepository userDetailsRepository;
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDetails> getAllUsers() {
+        return UserDetailsRepository.findAll();
     }
 
-    public User saveUser(User user) {
-        return userRepository.save(user);
+    public UserDetails saveUser(UserDetails user) {
+        return UserDetailsRepository.save(user);
     }
 }
 ```
 
 ```java
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/")
 public class UserController {
     @Autowired
-    private UserService userService;
+    private UserDetailsService userDetailsService;
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-    @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.saveUser(user);
+    @GetMapping(path = "/test-jpa")
+    public List<UserDetails> getUsers() {
+        UserDetails userDetails = new UserDetails("xyx", "xyz@conceptandcoding.com");
+        userDetailsService.saveUser(userDetails);
+        return userDetailsService.getAllUser();
     }
 }
 ```
+
+### Output
+![output](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/output.png)
+
+To enable the console, we can add, below two properties in "application.properties"
+```properties
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+```
+
+You can open the console in `http://localhost:8080/h2-console`. This looks very simple, but what's happening inside?
 
 ## 3. Architecture of JPA
 
@@ -130,6 +126,8 @@ JPA architecture consists of several key components:
 - **EntityManagerFactory**: Factory class for `EntityManager` instances.
 - **Persistence Unit**: A set of all entity classes that are managed by `EntityManager` in an application.
 - **Persistence Context**: A set of entity instances in which for any persistent entity identity, there is a unique entity instance.
+
+![JPAArchitecture](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JPAArchitecture.png)
 
 ## 4. What is Persistence Unit in JPA
 
