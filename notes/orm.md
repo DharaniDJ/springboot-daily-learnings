@@ -196,7 +196,42 @@ UseCase2 : Transaction Manager for creating txn which can span across multiple D
 
 ### EntityManager
 
-`EntityManager` is the primary interface used to interact with the persistence context. It provides methods for CRUD operations, querying, and transaction management.
+`EntityManager` is the primary interface in JPA used to interact with the persistence context. It provides methods for CRUD operations, querying, and transaction management.
+
+    - persist() (for saving)
+    - merge() (for updating)
+    - find() (for fetching)
+    - remove() (for deleting)
+    - createQuery() (for executing JPQL queries)
+
+- EntityManager interface methods are implemented by JPA Vendors like Hibernate etc...
+- EntityManagerFactory helps to create an object of EntityManager.
+
+- JPARepository internally is connecting to EntityManager. Why can't we directly interact with EntityManager?
+- JPARepository provides some predefined methods like findAll, deleteAll etc.
+- Also provides pagination and sorting capability...
+- Also @Transactional support on operations which needs it on operations like insert, modify, delete.
+- Start and close EntityManager resource, so no need to manage it.
+
+![JpaRepository-Transactional](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JpaRepository-Transactional.png)
+
+- EntityManager insert/update/delete operations are Transaction bounded. Means, it first check if `Transaction` is open, if not, it will throw exception. But not all(read operations are not transaction bounded).
+
+What if, I try to directly call EntityManager persist method, instead of spring framework.
+
+```java
+@Service
+public class UserDetailsService {
+    @PersistenceContext
+    EntityManager entityManager;
+
+    public void saveUser(UserDetails user){
+        entityManager.persist(user);
+    }
+}
+```
+
+The above code will return `TransactionRequiredException` error saying `No EntityManager with actual transaction available for current thread`.
 
 Example:
 
@@ -226,6 +261,10 @@ public class JpaExample {
 ### PersistenceContext
 
 `@PersistenceContext` is used to inject an `EntityManager` into a Spring-managed bean.
+
+- Consider its a first level cache.
+- For each EntityManager, PersistenceContext object is created, which hold list of Entities its working on.
+- Also manage the life cycle of entity.
 
 Example:
 
@@ -257,21 +296,4 @@ The lifecycle of an entity in JPA consists of four states:
 3. **Detached**: The entity is no longer associated with the persistence context.
 4. **Removed**: The entity is marked for removal from the database.
 
-### Example
-
-```java
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
-public class JpaExample {
-    public static void main(String[] args) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("example-unit");
-        EntityManager em = emf.createEntityManager();
-
-        // New/Transient state
-        User user = new User();
-        user.setName("John Doe");
-        user.setEmail("john.doe@example
-
-Similar code found with 2 license types
+![lifecycle](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/lifecycle.png)
