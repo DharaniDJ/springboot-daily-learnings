@@ -143,75 +143,54 @@ JPA architecture consists of several key components:
 
 ## 4. What is Persistence Unit in JPA
 
-A Persistence Unit defines a set of all entity classes that are managed by `EntityManager` in an application. It is defined in the `persistence.xml` file, which is located in the `META-INF` directory. The `persistence.xml` file contains configuration details such as the data source, entity classes, and JPA provider.
+A Persistence Unit defines a set of all entity classes which share same configuration that are managed by `EntityManager` in an application. It is defined in the `persistence.xml` file, which is located in the `META-INF` directory. The `persistence.xml` file contains configuration details such as the database connection properties , entity classes, and JPA provider(hibernate etc.) etc...
 
 Example `persistence.xml`:
 
-```xml
-<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" version="2.1">
-    <persistence-unit name="example-unit">
-        <class>com.example.User</class>
-        <properties>
-            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:testdb"/>
-            <property name="javax.persistence.jdbc.user" value="sa"/>
-            <property name="javax.persistence.jdbc.password" value="password"/>
-            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
-        </properties>
-    </persistence-unit>
-</persistence>
-```
+![persistencexml](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/persistencexml.png)
+
 
 ## 5. What is EntityManagerFactory
 
-`EntityManagerFactory` is a factory class for `EntityManager` instances. It is responsible for creating and managing multiple `EntityManager` instances. It is typically created once per application and is thread-safe.
+- Using Persistence Unit configuration, EntityManagerFactory object get created during application startup.
+- If any property is not provided, default one is picked and set.
+- 1 EntityManagerFactory for 1 Persistence Unit.
+- This class act as a Factory to create an object of EntityManager.
 
-Example:
+Example `LocalContainerEntityManagerFactoryBean.java`:
 
-```java
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+- In `createNativeEntityManagerFactory class`, from the persistence unit, it is creating the entity manager factory object.
 
-public class JpaExample {
-    public static void main(String[] args) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("example-unit");
-        // Use the EntityManagerFactory
-        emf.close();
-    }
-}
-```
+![LocalContainerEntityManagerFactoryBean](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/LocalContainerEntityManagerFactoryBean.png)
+
+What if we want to manually create an object of EntityManagerFactory?
+
+![AppConfig](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/AppConfig.png)
+
 
 ## 6. Transaction Manager association with EntityManagerFactory
 
 In Spring, the `PlatformTransactionManager` is associated with the `EntityManagerFactory` to manage transactions. The `JpaTransactionManager` is a specific implementation for JPA.
 
-Example configuration:
+Let's say we have 2 DB's H2 and MySQL. We have one persistence unit, one entity manager factory, and one transaction manager for each H2 and MySQL.
 
-```java
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.transaction.PlatformTransactionManager;
+During persistence unit, we have specified the value for `transaction-type` value either:
+- RESOURCE_LOCAL (defaul) (Scope to only one DB).
+- JTA (Java Transaction API) (Scope span across multiple DBs).
 
-import javax.persistence.EntityManagerFactory;
+During application startup, after `EntityManagerFactory` object created, based on RESOURCE_LOCAL OR JTA, transaction manager object gets created.
 
-@Configuration
-public class JpaConfig {
+Example:
 
-    @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setPersistenceUnitName("example-unit");
-        return em;
-    }
+UseCase1 : Transaction Manager for managing txn for 1 DB
 
-    @Bean
-    public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
-        return new JpaTransactionManager(emf);
-    }
-}
-```
+![ORM-UseCase1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ORM-UseCase1.png)
+
+We can create it manually too:
+
+![ORM-UseCase1-Manual](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/ORM-UseCase1-Manual.png)
+
+UseCase2 : Transaction Manager for creating txn which can span across multiple DB
 
 ## 7. EntityManager and PersistenceContext
 
