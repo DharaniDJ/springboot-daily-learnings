@@ -117,6 +117,8 @@ spring.h2.console.path=/h2-console
 
 You can open the console in `http://localhost:8080/h2-console`. This looks very simple, but what's happening inside?
 
+![h2-console](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/h2-console.png)
+
 ## 3. Architecture of JPA
 
 JPA architecture consists of several key components:
@@ -128,6 +130,16 @@ JPA architecture consists of several key components:
 - **Persistence Context**: A set of entity instances in which for any persistent entity identity, there is a unique entity instance.
 
 ![JPAArchitecture](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/JPAArchitecture.png)
+
+- Persistence unit is where we provide our configurations like `DB Connections`, `what dialect, driver we want to use`. So it is basically `application.properties`. So whenever you start an application, spring framework uses that persistance unit and it creates an object of `EntityManagerFactory` (Kind of Java Object). Now this EntityManagerFactor uses to create `EntityManager`.
+
+- For one persistence unit, you have one object of `EntityManagerFactory`. If you have more that one persistence unit, the equivalent number of factories would be created. **If your application has more that one DB, then it is advisable not to use `application.properties`. Use `@Configuration` class and provide both the persistence unit or configuration properly and connect to a proper DB.**
+
+- Whenever you required an `EntityManager` object, it goes to the factory and get one. But what is `EntityManager`? You can say it's a session in hibernate. In JPA terms it's called as `EntityManager`. `EntityManager` exposes APIs like persist, query, insert ...etc. `JPARepository` internally connects with `EntityManager` within its implementation. `Hibernate` provided an implementation for this JPARepository, we have a class called `session impl` class.
+
+- Each `EntityManager` object creates a `PersistenceContext` which holds the entity. So Persistence context, you can say that it's a placeholder for entities whatever the entity manager is working on. **For every `EntityManager` there is a `PersistenceContext` and this `PersistenceContext` only stores the entity which entity manager is working one.** This `PersistenceContext` helps into **first level caching**, because it only stores the entity even though it's there in the DB, it is also working in memory.
+
+- Once it is done, ultimately dialect comes into the picture. It converts JQL(ORM Sytax) to SQL. Dialects talks to JDBC and JDBC talks to DB
 
 ## 4. What is Persistence Unit in JPA
 
