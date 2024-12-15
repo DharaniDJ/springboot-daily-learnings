@@ -1,20 +1,5 @@
 # First-Level Caching in JPA
 
-Welcome to **Concept and Coding**! In this project, we explore the concept of **First-Level Caching in JPA**, which is an essential aspect of the JPA architecture. This README provides a detailed walkthrough of the JPA lifecycle, first-level caching, and how it optimizes data access by reducing database queries.
-
-If you're new to JPA or have not seen the previous video on **JPA Architecture and Lifecycle**, we highly recommend revisiting it before diving into this topic.
-
----
-
-## Table of Contents
-1. [Introduction to JPA Lifecycle](#introduction-to-jpa-lifecycle)
-2. [What is First-Level Caching?](#what-is-first-level-caching)
-3. [How First-Level Caching Works](#how-first-level-caching-works)
-4. [Code Walkthrough](#code-walkthrough)
-5. [Key Takeaways](#key-takeaways)
-
----
-
 ## Introduction to JPA Lifecycle
 The JPA lifecycle consists of multiple states that an entity object transitions through, depending on operations performed. Here's a quick recap:
 
@@ -52,6 +37,15 @@ The database is only updated when `flush` or `commit` is called. Until then, all
 
 ---
 
+## Example Code
+![caching1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/caching1.png)
+![caching2](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/caching2.png)
+![caching-output1](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/caching-output1.png)
+![caching-output2](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/caching-output2.png)
+![caching-output3](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/caching-output3.png)
+
+---
+
 ## How First-Level Caching Works
 The persistence context acts as a temporary storage where entities are managed. Here’s how it works step-by-step:
 
@@ -78,43 +72,25 @@ The persistence context acts as a temporary storage where entities are managed. 
 
 ---
 
-## Code Walkthrough
-Here’s a step-by-step demonstration:
-
-### Save and Fetch Example:
-```java
-@RestController
-@RequestMapping("/api/jpa")
-public class JpaController {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @PostMapping("/save")
-    public ResponseEntity<String> saveUser() {
-        User user = new User("John Doe");
-        userRepository.save(user);
-        return ResponseEntity.ok("User saved.");
-    }
-
-    @GetMapping("/fetch/{id}")
-    public ResponseEntity<User> fetchUser(@PathVariable Long id) {
-        User user = userRepository.findById(id).orElse(null);
-        return ResponseEntity.ok(user);
-    }
-}
-```
-
-### Observations:
-1. On the first request to `/save`, an INSERT query is executed.
-2. On the subsequent request to `/fetch/{id}` within the same HTTP request, no SELECT query is executed.
-3. On a new HTTP request, a SELECT query is triggered because a new persistence context is created.
-
 ### Why?
 Each HTTP request generates a new `EntityManager`, which creates an isolated persistence context.
 
 ---
+### So PersistenceContext scope is associated with EntityManager:
 
+![persistencecontext](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/persistencecontext.png)
+
+### Output
+
+![persistencecontextoutput](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/persistencecontextoutput.png)
+
+### DispatcherServlet Code Snapshot
+
+![dispatcherservletcode](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/dispatcherservletcode.png)
+
+
+![caching3](https://github.com/DharaniDJ/spring-boot-daily-learnings/blob/assets/caching3.png)
+---
 ## Key Takeaways
 - **Single Persistence Context**: One EntityManager equals one persistence context.
 - **Automatic Caching**: First-level caching is automatic and doesn’t require additional configuration.
